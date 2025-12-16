@@ -136,6 +136,8 @@ See:
 - `docs/GOVERNANCE.md`
 - `docs/THREAT_MODEL.md`
 - `docs/FAIRNESS.md`
+- `docs/PRIVACY_AND_REDACTION.md`
+- `docs/PROJECT_BRIEF.md`
 
 ---
 

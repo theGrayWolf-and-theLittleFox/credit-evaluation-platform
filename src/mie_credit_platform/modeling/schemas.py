@@ -97,3 +97,24 @@ class FairnessReportResponse(BaseModel):
     tpr_by_group: dict[str, float]
 
 
+class AuditEventRecord(BaseModel):
+    """
+    Normalized shape for audit events returned by the API.
+    """
+
+    id: int
+    ts: float
+    request_id: str
+    event_type: str
+    model_version: str | None
+    applicant_id: str | None
+    payload: dict
+
+
+class AuditEventListResponse(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    events: list[AuditEventRecord]
+
+
