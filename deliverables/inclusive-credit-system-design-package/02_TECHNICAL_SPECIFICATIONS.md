@@ -60,15 +60,15 @@
 - Explicit manual-review state where configured.
 - Deterministic error code, safe message, and correlation ID on failure.
 
-### HTTP behavior
+### Target HTTP behavior
 
-- `200` valid result; `400/422` malformed or contract-invalid request; `401` missing/invalid authentication; `403` unauthorized tenant/action; `409` schema/model version conflict; `429` rate limit; `503` approved model or required audit dependency unavailable.
+- `200` valid result; `400/422` malformed or contract-invalid request; `401` missing/invalid authentication; `403` unauthorized tenant/action; `409` schema/model version conflict; `429` rate limit; `503` approved model or required audit dependency unavailable. The reference service implements only part of this status model; gateway, tenant-authorization, version-conflict, and rate-limit behavior are production requirements.
 - Idempotency key should be supported for lender retries. Duplicate requests must not create contradictory decisions.
 - OpenAPI schema should be versioned and contract-tested; breaking changes require a new API version.
 
 ## 2.3 Feature contract
 
-Each feature definition should specify name, type, units, allowed range, missing-value policy, source, lookback window, transform, monotonic expectation, data-quality rules, consumer-consent basis, and reason-code mapping. The current code publishes and validates named alternative-data features and provides a schema hash.
+Each feature definition should specify name, type, units, allowed range, missing-value policy, source, lookback window, transform, monotonic expectation, data-quality rules, consumer-consent basis, and reason-code mapping. The current core contract enforces required and optional names, numeric types, ordering, and a schema hash. Separate API metadata supplies labels and control ranges to the frontend. Those published ranges are not yet a complete backend validation contract: the scoring path performs limited clamping for payment rates and event counts but does not reject every out-of-range value.
 
 Required production rules:
 

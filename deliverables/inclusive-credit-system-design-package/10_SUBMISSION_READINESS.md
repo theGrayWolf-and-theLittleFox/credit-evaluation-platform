@@ -1,6 +1,6 @@
 # 10. Submission Readiness, Traceability, and Acceptance Package
 
-This consolidated dossier is structured as a submission-ready technical evidence package for architecture, engineering, model-risk, responsible-AI, compliance, grant, or immigration review. It records what is implemented, what was exercised, what is shown in the product demonstration, and what remains incomplete. Submission readiness in this section means that the evidence is organized, traceable, printable, and reviewable. It does not mean the platform is authorized for production lending.
+This section is the reviewer handoff. It maps each requested evidence category to source code, tests, machine-readable artifacts, diagrams, or product captures and states where the evidence stops. The dossier is ready to print and review; the software is not authorized for production lending.
 
 ## 10.1 Submission statement
 
@@ -9,13 +9,13 @@ This consolidated dossier is structured as a submission-ready technical evidence
 | Artifact | One consolidated Word dossier with embedded diagrams, product captures, technical narrative, and machine-readable appendices |
 | Repository | `credit-evaluation-platform` |
 | System type | Open-source alternative-data credit evaluation reference platform |
-| Demonstrated mode | Local deterministic mock mode using synthetic applicant and outcome data |
+| Demonstrated mode | Local mock mode using synthetic inputs, typed fixtures, and runtime-generated mock fields |
 | Intended review | Technical architecture, implemented controls, model-development process, fairness design, product behavior, and evidence completeness |
 | Production authorization | Not requested and not claimed |
 | Independent validation | Required before consequential credit use |
 | Legal conclusion | Outside the scope of this technical package |
 
-The package can be submitted as evidence that a coherent technical system has been designed and partially implemented. It should not be described as evidence of real-world model efficacy, favorable impact, legal compliance, production security, or a completed lender deployment.
+The evidence supports a narrow, defensible statement: the repository contains a connected reference implementation, and the main development and interface paths have been exercised. It does not establish real-world model efficacy, favorable impact, legal compliance, production security, or a completed lender deployment.
 
 ## 10.2 Requirement-to-evidence traceability
 
@@ -26,7 +26,7 @@ The package can be submitted as evidence that a coherent technical system has be
 | Component documentation | Section 3 | `src/ice/`, `services/api/`, `src/flg/`, `src/mie_credit_platform/`, `frontend/src/` | Scoring, explanation, fairness, portfolio, outcome, and governance views | Multiple Python namespaces remain a consolidation risk |
 | Model development and testing | Section 4 and Appendices A-C | Training scripts, model abstraction, registry, automated tests, training report | Score, explanation, portfolio, reason-code behavior | Synthetic data and baseline performance cannot establish production fitness |
 | Fairness and bias testing | Section 5 | Fairness metric implementations, tests, thresholds, monitoring design | Group counts, selection rates, parity and opportunity differences | Demonstration batch is synthetic; legal and statistical review remain required |
-| Screenshots and demonstrations | Section 9 | React source, typed mock adapter, screenshot integrity manifest | Twelve live mock-mode captures | Screens are evidence of UI behavior, not real-world outcomes |
+| Screenshots and demonstrations | Section 9 | React source, typed mock adapter, screenshot integrity manifest | Twelve local mock-mode captures | Screens are evidence of UI behavior, not real-world outcomes |
 | Evidence of completed work | Section 6 and Appendices A-E | Test output, registry snapshot, report JSON, source mapping, image hashes | Exercised end-to-end mock workflow | Claims are limited to the captured repository and evidence run |
 | Gaps and completion plan | Section 7 | Risk register and staged roadmap | Planned/review control labels in governance UI | Roadmap items are not represented as complete |
 
@@ -113,7 +113,7 @@ The package can be submitted as evidence that a coherent technical system has be
 
 ## 10.6 Screenshot evidence handling
 
-The twelve product captures were produced from the locally running React interface after exercising the relevant controls. The capture set contains synthetic application references and mock results only. No screenshot should be used as a substitute for API logs, test output, model reports, source review, or independent validation.
+The twelve product captures came from one locally run React session. They contain synthetic application references, fixture values, and runtime-generated mock fields. They demonstrate interface state and operator flow. They are not substitutes for API logs, test output, model reports, source review, or independent validation.
 
 Integrity verification:
 
@@ -149,4 +149,4 @@ The dossier builder embeds each image inline, adds a caption immediately below t
 
 ## 10.9 Final submission boundary
 
-The appropriate submission claim is: the repository contains a technically coherent, open-source reference implementation for alternative-data credit evaluation with working synthetic-data training, real-time scoring interfaces, baseline explainability, fairness metrics, privacy-aware audit primitives, governance concepts, and an exercised demonstration console. The package also identifies the specific technical, statistical, operational, legal, and governance work required before any production lending use.
+A reviewer can reasonably conclude that the repository contains an open-source reference implementation for alternative-data credit evaluation, including synthetic-data training, scoring interfaces, baseline explainability, fairness metrics, privacy-aware audit primitives, governance concepts, and an exercised demonstration console. The same evidence also shows what is unfinished: real-data validation, model convergence and performance work, production security, durable audit controls, legal review, operating evidence, and lender-pilot results.

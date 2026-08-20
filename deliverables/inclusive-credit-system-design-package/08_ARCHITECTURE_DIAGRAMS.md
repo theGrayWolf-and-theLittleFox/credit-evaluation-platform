@@ -1,6 +1,6 @@
 # 8. Architecture Diagram Catalog
 
-The figures in this section are normative design views. They are not marketing illustrations. Each figure identifies a system boundary, a control hand-off, or an evidence relationship that must be implemented and tested. The SVG files are the editable masters; PNG copies are provided for Word, email, and review systems that do not render SVG reliably.
+Each figure answers a specific engineering question: where the lender's responsibility ends, how one scoring transaction is reconstructed, where sensitive data is separated, how a model reaches production, and what happens after a fairness trigger. These are target-state design views, not proof that every control is already implemented. The SVG files are the editable masters; PNG copies are included for Word, email, and review systems that do not render SVG reliably.
 
 ## Architecture view 1 — System context and decision boundary
 

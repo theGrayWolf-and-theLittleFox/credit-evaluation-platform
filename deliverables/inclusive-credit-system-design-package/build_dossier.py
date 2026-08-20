@@ -95,6 +95,13 @@ def set_repeat_table_header(row):
     tr_pr.append(tbl_header)
 
 
+def prevent_table_row_split(row):
+    tr_pr = row._tr.get_or_add_trPr()
+    cant_split = OxmlElement("w:cantSplit")
+    cant_split.set(qn("w:val"), "true")
+    tr_pr.append(cant_split)
+
+
 def add_page_number(paragraph):
     paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     run = paragraph.add_run("Page ")
@@ -167,8 +174,9 @@ def add_cover(doc):
     font(p.add_run("Architecture, specifications, model development, fairness testing, and implementation evidence"), 14, color=SLATE)
     p.paragraph_format.space_after = Pt(60)
     for label, value in (
+        ("Prepared by", "Mr. Wang"),
         ("Repository", "credit-evaluation-platform"),
-        ("Edition", "Submission-ready consolidated technical evidence edition"),
+        ("Document purpose", "Technical review and implementation evidence"),
         ("Evidence status", "Reference implementation; synthetic-data demonstration; not production approved"),
     ):
         p = doc.add_paragraph()
@@ -206,7 +214,7 @@ def add_contents(doc):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(18)
     font(p.add_run("Evidence convention. "), 10.5, bold=True, color=NAVY)
-    font(p.add_run("Implemented claims are separated from scaffolding and planned capabilities. This dossier does not treat roadmap commitments as completed work."), 10.5)
+    font(p.add_run("Implemented work, partial scaffolding, and planned controls are labeled separately throughout the dossier."), 10.5)
     doc.add_page_break()
 
 
@@ -255,6 +263,7 @@ def add_table(doc, rows):
                 shade(cell, LIGHT)
         if ridx == 0:
             set_repeat_table_header(table.rows[0])
+        prevent_table_row_split(table.rows[-1])
     doc.add_paragraph().paragraph_format.space_after = Pt(1)
 
 
@@ -454,7 +463,7 @@ def add_evidence_appendices(doc):
         doc,
         "Appendix E. Screenshot Integrity Manifest",
         EVIDENCE_ROOT / "SCREENSHOT_MANIFEST.sha256",
-        "The SHA-256 values below identify the twelve live mock-mode product captures embedded in Section 9. Verify them from the package root with `shasum -a 256 -c evidence/SCREENSHOT_MANIFEST.sha256`.",
+        "The SHA-256 values below identify the twelve local mock-mode product captures embedded in Section 9. Verify them from the package root with `shasum -a 256 -c evidence/SCREENSHOT_MANIFEST.sha256`.",
     )
 
 
@@ -495,7 +504,7 @@ def main():
     props = doc.core_properties
     props.title = "Inclusive Credit Evaluation Platform — Technical Evidence Dossier"
     props.subject = "Architecture, specifications, model development, fairness testing, and implementation evidence"
-    props.author = "Open Source Project Documentation"
+    props.author = "Mr. Wang"
     props.keywords = "credit, alternative data, responsible AI, fairness, model risk, architecture"
     doc.save(OUT)
     scrub_core_timestamps(OUT)

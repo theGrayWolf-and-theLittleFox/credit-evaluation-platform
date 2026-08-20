@@ -1,10 +1,12 @@
 # 9. Product Demonstration and Operator Walkthrough
 
-This section documents the working React demonstration console included in `frontend/`. The screens below were captured from the repository's locally running application in mock mode. They show implemented interaction paths and presentation behavior; they do not represent a production lending deployment or the use of real applicant records.
+The React console in `frontend/` was run locally and reviewed screen by screen. The captures below show the implemented navigation, input, result, explanation, fairness, portfolio, borrower-rights, outcome, audit, and governance views. They are product evidence, but only for the local mock-mode interface; no real applicant record or production lending service was used.
 
 ## Demonstration environment
 
-The console is a Vite and React application backed by a typed API client. When `VITE_API_BASE_URL` is not configured, the client selects the repository's deterministic mock adapter. Mock mode exercises the same TypeScript request and response shapes used by the live FastAPI integration, which makes it suitable for interface review, workflow demonstrations, and document evidence without transmitting applicant information.
+The console is a Vite and React application backed by a typed API client. When `VITE_API_BASE_URL` is absent, empty, or set to `mock`, the client selects the local mock adapter. That adapter reuses the frontend's production request and response types, but it is not a full simulation of the FastAPI service. Model, contract, fairness, governance, portfolio, and audit panels are fixture-backed. The scoring function also generates the score, decision, request ID, and `created_at` value at runtime. Mock mode is therefore useful for interface review, but not for reproducibility, model-fidelity, persistence, or audit claims.
+
+One visible difference matters during review: the mock model card reports version `0.1.0`, while the reproducible training evidence in Appendices B and C reports version `0.0.1`. The former is a frontend fixture; the latter is the model produced by the documented training command.
 
 ```text
 cd frontend
@@ -26,7 +28,7 @@ The navigation bar displays the active execution mode. Before interpreting a res
 
 ![Product dashboard showing the OpenCredit Commons navigation, alternative-data positioning, API status, active model, feature-contract count, and decision threshold.](screenshots/01-product-overview.jpg)
 
-The landing view gives the operator a fast integrity check before any scoring action. The four status cards are not decorative metrics: together they identify the service state, model artifact, input contract, and threshold that govern downstream decisions. The `Open decision lab` action moves directly to the contract-driven scoring workbench.
+The landing view gives the operator a quick orientation before any scoring action. In live mode, the four cards identify the service state, model artifact, input contract, and threshold used downstream. In the captured mock session, those values come from fixtures and should be read as layout and workflow evidence. The `Open decision lab` action moves directly to the contract-driven scoring workbench.
 
 Operator procedure:
 
@@ -40,11 +42,11 @@ Operator procedure:
 
 ![Decision workbench showing the model contract, application identifier, scoring actions, and the beginning of the alternative-data input groups.](screenshots/02-decision-input.jpg)
 
-The decision workbench is generated from the active feature contract instead of a separately maintained list of form fields. Each definition supplies the field name, label, description, minimum, maximum, step size, default value, requirement flag, and directional interpretation. This prevents silent drift between the browser form and the scoring schema.
+The decision workbench is generated from the feature-contract response instead of a separately maintained list of form fields. Each definition supplies the field name, label, description, minimum, maximum, step size, default value, requirement flag, and directional interpretation. This reduces the chance that the browser form drifts from the published schema. It does not by itself prove that the backend enforces every displayed bound; the current scoring path performs only limited range sanitization.
 
 The input workflow separates three data classes:
 
-- `application_id` identifies the request in the user workflow; the audit layer stores a hashed representation rather than the direct identifier.
+- `application_id` identifies the request in the user workflow. In the FastAPI path, configured audit settings replace it with a pseudonymous reference before persistence. The mock adapter does not create a production audit record.
 - `features` contains scored alternative-data signals such as payment history, verified cash flow, risk events, and stability indicators.
 - `sensitive_attributes` is optional monitoring context. It is passed to authorized fairness-monitoring paths and is not used to calculate the applicant score.
 
@@ -61,12 +63,12 @@ Operator procedure:
 
 ![Completed mock decision showing an approval score, threshold, reason codes, and the borrower-transparency preview with plain-language factors.](screenshots/03-scored-decision.jpg)
 
-The result panel keeps the numerical score, decision threshold, decision label, model version, and reason codes in one visual record. The adjoining borrower-transparency view translates stable reason codes into plain-language factors and suggested next steps. The interface also states that protected characteristics are not used to generate the score and exposes a human-review path.
+The result panel places the numerical score, decision threshold, decision label, model version, and reason codes in one view. The adjoining borrower-transparency panel translates reason-code fixtures into plain-language factors and suggested next steps. The interface also states that protected characteristics are not used to generate the score and exposes a human-review path. In mock mode, the score and decision are generated at runtime while the reason codes come from a fixed fixture, so this screen does not establish explanation fidelity.
 
 Interpretation rules:
 
 - The numerical score is evaluated against the displayed threshold; the decision label should never be interpreted without both values.
-- Reason codes are derived from governed feature contributions and must remain stable across API, audit, and notice-generation layers.
+- In the FastAPI path, reason codes are generated from submitted feature values. Their fidelity and stability still need dedicated tests across API, audit, and notice-generation layers.
 - Borrower-facing language is an explanation surface, not a substitute for jurisdiction-specific adverse-action review.
 - A demonstration approval is synthetic evidence of interface behavior, not an underwriting recommendation.
 
@@ -74,9 +76,9 @@ Interpretation rules:
 
 ![Explainability panel with signed feature contributions beside a fairness monitor containing group sample sizes, selection rates, and outcome rates.](screenshots/04-explainability-fairness.jpg)
 
-The explanation panel ranks feature contributions by absolute magnitude. Positive bars increase the model output relative to the local baseline; negative bars reduce it. The panel binds the explanation request to the application reference and the latest score request so an auditor can reconcile the views.
+The explanation panel ranks feature contributions by absolute magnitude. Positive bars increase the model output relative to the local baseline; negative bars reduce it. The panel displays the application reference and its own explanation request ID. A production audit design should also carry an explicit link to the scored decision being explained; the current response contract does not expose that parent request ID.
 
-The fairness monitor operates on a synthetic batch with protected-group labels, predicted outcomes, and observed labels. Selecting `Run fairness report` calculates demographic-parity and equal-opportunity differences and returns group-level selection rates and counts. The batch generator is intentionally visible so reviewers do not mistake the demonstration values for deployment evidence.
+The fairness panel displays a synthetic batch with protected-group labels, predicted outcomes, and observed labels. In live mode, `Run fairness report` sends those rows to `/v1/audit/fairness`, where the service calculates demographic-parity and equal-opportunity differences, group counts, selection rates, and true-positive rates. In mock mode, the button returns a fixed fairness fixture. The batch controls remain visible so a reviewer can see the intended workflow without mistaking the fixture for deployment evidence.
 
 Review sequence:
 
@@ -90,7 +92,7 @@ Review sequence:
 
 ![Portfolio analysis results showing average score, approval rate, application count, threshold, leading reason codes, score-band mix, and a cohort preview.](screenshots/05-portfolio-analysis.jpg)
 
-The portfolio workbench evaluates a cohort against one model contract and one threshold. The operator can choose the demonstration cohort size and the protected attribute used only for aggregated monitoring. Results combine decision statistics, reason-code frequency, score-band distribution, and a small row-level preview.
+The portfolio workbench is designed to evaluate a cohort against one model contract and threshold. The operator can choose the demonstration cohort size and the protected attribute used only for aggregated monitoring. In live mode, the API scores the submitted applications; in mock mode, the panel slices a prepared portfolio fixture to the requested size. Results combine decision statistics, reason-code frequency, score-band distribution, and a small row-level preview.
 
 The portfolio summary is intended for operational review rather than individual adjudication. A high-frequency reason code may indicate a cohort characteristic, a feature-quality problem, a data-source shift, or a threshold interaction. It should trigger analysis against lineage and data-quality evidence before any policy change.
 
@@ -98,7 +100,7 @@ The portfolio summary is intended for operational review rather than individual 
 
 ![Governance center showing the decision-lineage stages, control readiness, observed-outcome workflow, and audit explorer.](screenshots/06-governance-lineage.jpg)
 
-The governance center exposes the evidence chain used to reproduce a decision: permission, source connection, validation, versioned features, and the final scored decision. Adjacent controls connect the decision to observed repayment outcomes and governed model updates. The audit explorer filters append-only events by type and application reference without requiring direct personal identifiers in the display.
+The governance center presents the evidence chain a production system would use to reproduce a decision: permission, source connection, validation, versioned features, and the final scored decision. Adjacent controls show how repayment outcomes and governed model updates would be connected. In the captured session, the lineage, control coverage, and audit rows are fixtures. The audit explorer can filter those fixture rows by type and application reference; the live API path queries the append-style JSONL store.
 
 An operator reviewing a questioned decision should follow the lineage from right to left:
 
@@ -138,19 +140,19 @@ This view joins an individual model result with a separately calculated cohort-m
 
 ![Outcome feedback panel showing the scored application reference, observation window, verified repayment result, append-only event action, and successful governance refresh.](screenshots/09-outcome-feedback.jpg)
 
-The outcome workflow connects a prior decision to later verified performance. The operator selects a governed observation window and records a binary result. The mock adapter returns confirmation that the outcome event was recorded and governance metrics were refreshed. In production, the same action requires source provenance, correction handling, late-arriving-event policy, access controls, retention rules, and an immutable link to the original decision event.
+The outcome workflow shows how a prior decision can be linked to later verified performance. The operator selects an observation window and records a binary result. The mock adapter returns `status: ok`, after which the UI refetches its governance query; it does not persist an outcome or recalculate governance metrics. The live FastAPI path appends an outcome event. A production implementation would also need source provenance, correction handling, late-arriving-event policy, access controls, retention rules, and an immutable link to the original decision event.
 
 ## Demonstration screen 11 — Continuous monitoring signals
 
 ![Governance monitoring view showing feature drift, calibration gap, parity difference, explanation stability, control state, and bounded signal bars.](screenshots/10-governance-monitoring.jpg)
 
-The monitoring tab presents four different control families rather than collapsing them into a single health score. Feature drift tests input-distribution change, calibration gap tests the relationship between predicted and observed outcomes, parity difference tests subgroup selection behavior, and explanation stability tests whether contribution patterns change unexpectedly. Each signal needs its own population window, baseline, threshold, severity, owner, and escalation runbook.
+The monitoring tab presents four control families instead of collapsing them into one health score. In the current frontend, the displayed values are fixtures. The intended interpretation is still useful: feature drift concerns input-distribution change, calibration gap compares predictions with observed outcomes, parity difference tracks subgroup selection behavior, and explanation stability tracks unexpected changes in contribution patterns. A connected implementation needs a population window, baseline, threshold, severity, owner, and escalation runbook for each signal.
 
 ## Demonstration screen 12 — Governance control register
 
-![Governance control register showing live evidence coverage and control rows for data rights, lineage, subgroup evaluation, explanation review, and audit capture.](screenshots/11-governance-controls.jpg)
+![Governance control register showing displayed evidence coverage and control rows for data rights, lineage, subgroup evaluation, explanation review, and audit capture.](screenshots/11-governance-controls.jpg)
 
-The control register binds operating evidence to named governance controls. The header strip summarizes explanation coverage, observed-outcome coverage, fairness review, and audit capture. Control rows identify the domain, accountable function, required evidence, and current readiness state. A production register should replace fixture values with queryable evidence identifiers and should require recorded approval before a control can change from review or planned to ready.
+The control register shows the intended link between operating evidence and named governance controls. The header strip summarizes explanation coverage, observed-outcome coverage, fairness review, and audit capture. Control rows identify the domain, accountable function, required evidence, and readiness state. The captured values are fixtures. A production register must replace them with queryable evidence identifiers and require recorded approval before a control can move from review or planned to ready.
 
 ## End-to-end demonstration script
 
@@ -163,11 +165,13 @@ The control register binds operating evidence to named governance controls. The 
 7. Run the synthetic fairness report and inspect group counts before rate differences.
 8. Run the portfolio analysis and examine leading reason-code concentration.
 9. Open `Governance`, select `Decision lineage`, and trace the evidence stages.
-10. Use the audit explorer to confirm that the decision, explanation, fairness, and portfolio events are indexed.
+10. Use the audit explorer to confirm that the expected fixture event categories are visible. Repeat the workflow in live mode when validating newly persisted events.
 
 ## Demonstration limitations
 
-- The screenshots use deterministic mock responses and synthetic applicant features.
+- The screenshots use synthetic features and fixture-backed mock views. Some scoring fields are generated at runtime, so separate mock runs are not bit-for-bit identical.
+- Mock scoring does not prove that the displayed reason codes explain the generated score or decision.
+- Mock fairness, governance, monitoring, portfolio, and audit values are presentation fixtures unless a section explicitly cites the live API evidence run.
 - No production data source, consumer-permission service, lender identity system, or adverse-action delivery channel is connected.
 - Displayed model metrics are demonstration fixtures unless independently reconciled with the evidence appendices.
 - Regulatory alignment labels describe the control design intent; they do not constitute legal approval or production certification.

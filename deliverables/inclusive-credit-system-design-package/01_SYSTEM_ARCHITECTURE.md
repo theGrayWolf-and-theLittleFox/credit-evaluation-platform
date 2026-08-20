@@ -2,7 +2,7 @@
 
 ## 1.1 Mission and system boundary
 
-The platform is designed to help regulated or mission-driven lenders evaluate thin-file and credit-invisible applicants using consumer-permissioned alternative data, while preserving explainability, fairness measurement, auditability, and human oversight. It has two architectural planes:
+This work joins two related systems: an offline framework for developing and reviewing alternative-data models, and an online service for using an approved model in a lender workflow. The design is aimed at thin-file and credit-invisible applicants and assumes consumer-permissioned data, explainability, fairness measurement, auditability, and human oversight. It has two architectural planes:
 
 - **Offline model and governance plane:** data validation, feature transformation, training, evaluation, fairness analysis, registry publication, approval, monitoring, and retraining.
 - **Online decision-support plane:** authenticated requests, schema validation, feature transformation, versioned inference, decision policy, reason codes, audit events, and monitoring-event ingestion.
@@ -52,8 +52,8 @@ flowchart LR
 1. The lender creates a unique application identifier and obtains any required consent.
 2. The lender sends an API request containing the application identifier, alternative-data feature values, and optional sensitive attributes separated for monitoring.
 3. Authentication and authorization controls establish the calling institution and permitted operation. The demo includes API-key-oriented scaffolding; production-grade identity and tenant authorization remain deployment work.
-4. Pydantic request schemas reject malformed or unexpected fields.
-5. The feature-contract layer validates ranges, missingness, names, and ordering, then transforms the payload into the model vector.
+4. Pydantic validates the declared field types and required request fields. The feature contract rejects missing and unknown feature names and rejects non-numeric values. The current request models do not forbid every unknown top-level field.
+5. The feature layer orders values for the model and applies minimal sanitization: payment rates are clamped to `[0, 1]`, and negative NSF or overdraft counts are clamped to zero. The API publishes broader range metadata for the UI, but complete server-side enforcement of those bounds remains open work.
 6. The serving layer loads the approved current model and registry metadata, computes a probability-like score, and applies a configured threshold.
 7. The explanation layer ranks feature contributions or deterministic reason-code rules and maps them to human-readable statements.
 8. The response includes application/request identifiers, score, recommendation or decision, reason codes, and model metadata.
@@ -109,7 +109,7 @@ Every released model should link: source-data snapshot ID, extraction timestamp,
 
 ### Reference local topology
 
-- React/Vite frontend at port 5173.
+- React/Vite frontend on a Vite-selected local port; the captured review session used port 4173.
 - FastAPI service at port 8000.
 - Local model artifact loaded from the filesystem.
 - JSON model registry and report files.

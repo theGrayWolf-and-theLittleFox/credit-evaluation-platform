@@ -20,6 +20,7 @@
 - Bundled Node 24 invocation started the Vite development server and completed `npm run build` successfully (93 modules transformed).
 - The in-app browser opened the mock-mode frontend at `http://127.0.0.1:4173`.
 - Scoring, explanation, fairness, portfolio-analysis, borrower-rights, outcome, and governance interactions were exercised before twelve interface screenshots were captured.
+- The mock adapter uses typed fixtures for most panels, but its scoring path generates score, decision, request-ID, and `created_at` values at runtime. The capture set records the exercised session; it is not a deterministic API transcript.
 - Captures are stored in `screenshots/` and reproduced in Section 9 of the consolidated dossier.
 
 ## Interpretation

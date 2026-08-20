@@ -2,7 +2,7 @@
 
 ## 6.1 Review scope
 
-The repository was inspected and exercised locally without asserting production deployment or partner-lender use.
+The review covered the checked-out repository, its automated tests, one reproducible training run, the frontend build, and a local mock-mode walkthrough. No production deployment or partner-lender use was observed.
 
 ## 6.2 Automated test evidence
 
@@ -19,7 +19,7 @@ F..........                                                              [100%]
 1 failed, 10 passed
 ```
 
-The failing assertion expects the governance summary to return `passing`. The service instead returns `review` because the supplied demonstration fairness report breaches the implemented disparity thresholds. The implementation is operating conservatively; the test oracle and approved policy expectation remain unresolved. The end-to-end logistic-regression training also reached the configured 200-iteration maximum, which is tracked as a model-development finding.
+The failing assertion expects the governance summary to return `passing`. The service returns `review` because the supplied fairness rows exceed the implemented 0.10 disparity thresholds. The code and the test expectation remain inconsistent. The end-to-end logistic-regression training also reached the configured 200-iteration maximum, which is tracked as a separate model-development finding.
 
 ### Test-to-capability traceability
 
@@ -78,7 +78,7 @@ The serialized `baseline.joblib` is intentionally not duplicated into this docum
 
 The React source includes dedicated views/components for scoring, explanation, fairness, redacted audit records, portfolio analysis, metrics, and the program roadmap. The Vite development server started with the bundled current Node runtime. The system-installed Node runtime failed because its crypto API was too old for the installed Vite version; this is a reproducibility/environment finding.
 
-The frontend was opened through the in-app browser at `http://127.0.0.1:4173` in mock mode. Twelve live interface captures were recorded after exercising scoring, explanation, fairness, portfolio analysis, borrower rights, outcome feedback, and governance interactions. The images are stored under `screenshots/`, hashed in `evidence/SCREENSHOT_MANIFEST.sha256`, and reproduced with operating notes in Section 9.
+The frontend was opened through the in-app browser at `http://127.0.0.1:4173` in mock mode. Twelve local interface captures were recorded while walking through scoring, explanation, fairness, portfolio analysis, borrower rights, outcome feedback, and governance views. The mock adapter is fixture-backed, but its score function also generates a score, decision, request ID, and `created_at` value at runtime; the screenshots therefore record one exercised session, not a bit-for-bit deterministic replay. The images are stored under `screenshots/`, hashed in `evidence/SCREENSHOT_MANIFEST.sha256`, and reproduced with operating notes in Section 9.
 
 For a reviewer with a normal local browser:
 
@@ -117,7 +117,6 @@ Existing source documentation includes architecture, fairness, governance, threa
 - No penetration test, SBOM, artifact signature, or immutable audit proof.
 - No legally approved adverse-action reason-code document.
 - The screenshot evidence is mock-mode UI evidence; it does not demonstrate a production API, real applicant data, or lender deployment.
-- Pre-existing uncommitted frontend changes were not modified by this documentation work.
 
 ## 6.8 Reproduction checklist
 
@@ -130,4 +129,4 @@ python -m pytest -q
 uvicorn services.api.app:app --port 8000
 ```
 
-Then call `/health`, `/v1/features/contract`, `/v1/models/current`, `/v1/score`, `/v1/explain`, `/v1/audit/fairness`, and `/v1/portfolio/analyze`, saving timestamped request/response transcripts with secrets and identifiers removed.
+Then call `/health`, `/v1/features/contract`, `/v1/models/current`, `/v1/score`, `/v1/explain`, `/v1/audit/fairness`, and `/v1/portfolio/analyze`, saving sanitized request/response transcripts with secrets and direct identifiers removed.

@@ -26,9 +26,9 @@ This duplication demonstrates experimentation but creates ownership and consiste
 ### B. Feature contract
 
 **Locations:** `src/ice/features/contract.py`, `src/ice/features/transform.py`, `src/flg/features/schema.py`, `src/mie_credit_platform/modeling/schemas.py`  
-**Responsibility:** define accepted feature names, types, bounds, ordering, and transformation into model inputs.  
+**Responsibility:** define accepted feature names, required/optional status, numeric types, ordering, schema hash, and transformation into model inputs; publish richer display metadata through the API.
 **Interfaces:** API request schemas; feature-contract endpoint; model pipeline.  
-**Status:** implemented and tested through contract publication and scoring.  
+**Status:** name/type/order enforcement and contract publication are implemented and tested. UI range metadata is implemented, but complete server-side range enforcement is not.
 **Failure modes:** naming divergence (`utility` vs `utilities`, differing lookback periods), missingness ambiguity, schema drift, unit mismatch.  
 **Required hardening:** canonical data dictionary, compatibility tests, provider provenance/freshness, explicit null semantics, transform versioning, and monotonicity review.
 
@@ -101,7 +101,7 @@ This duplication demonstrates experimentation but creates ownership and consiste
 
 **Locations:** `frontend/src/App.tsx` and components including `ScoreForm`, `FairnessPanel`, `ExplainabilityPanel`, `AuditTable`, `PortfolioWorkbench`, and `ProgramRoadmap`.
 **Responsibility:** demonstrate alternative-data inputs, decisions, explanations, fairness summaries, portfolio exploration, and redacted audit records.
-**Status:** implemented and exercised in mock mode. The local Vite server was opened through the in-app browser, and twelve views covering landing status, feature input, scoring, borrower rights, explanation, fairness, portfolio analysis, outcomes, governance lineage, monitoring, and control evidence were captured in `screenshots/` and reproduced in Section 9.
+**Status:** implemented and exercised in mock mode. The mock adapter uses typed fixtures for model, contract, fairness, governance, portfolio, and audit views, while generating some score, decision, request-ID, and `created_at` values at runtime. The local Vite application was opened through the in-app browser, and twelve views covering landing status, feature input, scoring, borrower rights, explanation, fairness, portfolio analysis, outcomes, governance lineage, monitoring, and control evidence were captured in `screenshots/` and reproduced in Section 9.
 **Production gap:** authenticated session, accessibility conformance, secure credential proxy, CSP/security headers, error/empty states, user research, and borrower-facing notice validation.
 
 ### M. Telemetry and logging
