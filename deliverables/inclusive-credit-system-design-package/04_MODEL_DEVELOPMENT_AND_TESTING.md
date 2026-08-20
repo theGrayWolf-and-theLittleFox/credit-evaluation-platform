@@ -84,7 +84,7 @@ Complex models must deliver material, stable benefit after calibration and fairn
 
 ## 4.4 Automated test evidence
 
-The review executed `.venv/bin/python -m pytest -q`. Result: **3 tests passed**. One convergence warning occurred in the end-to-end training flow.
+The review executed `.venv/bin/python -m pytest -q` across eleven collected tests. Result: **10 passed and 1 failed**. The failure is a governance-oracle mismatch in `tests/test_end_to_end.py`: the test expects `overall_status == "passing"`, but the implemented governance service returns `review` because the demonstration fairness report breaches its disparity thresholds. This conservative runtime disposition is consistent with the control logic; the test expectation and approved policy behavior must be reconciled before the suite can be represented as fully passing. The same flow emitted a scikit-learn convergence warning after reaching `max_iter=200`.
 
 Covered behaviors include:
 
@@ -95,8 +95,9 @@ Covered behaviors include:
 - Fairness endpoint group metrics and counts.
 - Portfolio analysis over multiple applications.
 - Direct fairness metric calculations.
+- Privacy redaction and governance-summary control behavior.
 
-Not demonstrated by the current three-test suite:
+Not demonstrated by the current suite:
 
 - Authentication failure/success, role/tenant isolation, replay/rate limiting.
 - Malformed fields, all feature range boundaries, NaN/infinity, oversized payloads.

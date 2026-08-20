@@ -25,13 +25,16 @@ The package deliberately avoids treating roadmap commitments as completed work. 
 6. `06_EVIDENCE_INDEX.md` — implementation traceability, test results, generated model artifacts, UI evidence, limitations, and reproduction commands.
 7. `07_RISK_REGISTER_AND_ROADMAP.md` — prioritized gaps and a regulator-oriented completion roadmap.
 8. `08_ARCHITECTURE_DIAGRAMS.md` — figure catalog with engineering interpretation and control implications.
-9. `diagrams/` — six rendered architecture figures in SVG and PNG, plus editable Mermaid sources.
-10. `evidence/` — machine-readable artifacts generated from the current codebase.
-11. `Inclusive_Credit_Platform_Technical_Dossier.docx` — consolidated, professionally formatted version of this package.
+9. `09_PRODUCT_DEMONSTRATION.md` — live UI evidence, operator procedure, interpretation rules, and mock-mode limitations.
+10. `10_SUBMISSION_READINESS.md` — claim traceability, acceptance gates, evidence integrity, and reviewer guidance.
+11. `diagrams/` — six rendered architecture figures in SVG and PNG, plus editable Mermaid sources.
+12. `screenshots/` — twelve live mock-mode product captures covering the complete demonstration workflow.
+13. `evidence/` — machine-readable artifacts and integrity manifests generated from the current codebase.
+14. `Inclusive_Credit_Platform_Technical_Dossier.docx` — consolidated, professionally formatted version of this package.
 
 ## Executive assessment
 
-The repository demonstrates a credible early reference architecture: alternative-data feature contracts; synthetic-data training; logistic-regression scoring; reason-code generation; subgroup fairness metrics; model registry metadata; JSONL/SQLite audit primitives; FastAPI endpoints; privacy redaction; and a React demonstration console. Three automated tests passed in this review, covering training, scoring, explanation, feature-contract publication, fairness analysis, portfolio analysis, and API behavior.
+The repository demonstrates a credible early reference architecture: alternative-data feature contracts; synthetic-data training; logistic-regression scoring; reason-code generation; subgroup fairness metrics; model registry metadata; JSONL/SQLite audit primitives; FastAPI endpoints; privacy redaction; and a React demonstration console. The current automated suite completed ten tests successfully and exposed one governance-oracle mismatch: the end-to-end test expects an overall `passing` state, while the implemented fairness control correctly returns `review` for the deliberately imbalanced demonstration cohort. The frontend production bundle completed successfully under the bundled Node 24 runtime.
 
 The strongest evidence is engineering scaffolding and end-to-end integration. The most important limitations are synthetic-only data, modest baseline discrimination (ROC-AUC 0.56588288 in the evidence run), a convergence warning at 200 iterations, no independent validation, no production authentication/authorization proof, no tamper-evident audit sealing, no verified live lender pilot, and no legally approved adverse-action mapping. These limitations are appropriate for a demo but must be closed before consequential credit use.
 

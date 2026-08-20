@@ -15,11 +15,11 @@ Command:
 Observed result:
 
 ```text
-...                                                                      [100%]
-3 passed
+F..........                                                              [100%]
+1 failed, 10 passed
 ```
 
-Observed warning: the end-to-end logistic-regression training reached the configured 200-iteration maximum. This is tracked as a model-development finding.
+The failing assertion expects the governance summary to return `passing`. The service instead returns `review` because the supplied demonstration fairness report breaches the implemented disparity thresholds. The implementation is operating conservatively; the test oracle and approved policy expectation remain unresolved. The end-to-end logistic-regression training also reached the configured 200-iteration maximum, which is tracked as a model-development finding.
 
 ### Test-to-capability traceability
 
@@ -28,6 +28,8 @@ Observed warning: the end-to-end logistic-regression training reached the config
 | `tests/test_smoke.py` | Train/save/load `flg` model; score through API; validate score/decision; create audit ID |
 | `tests/test_end_to_end.py` | Generate synthetic data; train/register model; health; score; explain; feature contract; fairness; portfolio analysis; audit flow |
 | `tests/test_fairness_metrics.py` | Fairness metric arithmetic |
+| `tests/test_governance.py` | Governance summary aggregation, coverage controls, fairness status, and control-register output |
+| `tests/test_privacy.py` | Audit payload redaction and sensitive-field handling |
 
 ## 6.3 Reproducible training evidence
 
@@ -76,25 +78,30 @@ The serialized `baseline.joblib` is intentionally not duplicated into this docum
 
 The React source includes dedicated views/components for scoring, explanation, fairness, redacted audit records, portfolio analysis, metrics, and the program roadmap. The Vite development server started with the bundled current Node runtime. The system-installed Node runtime failed because its crypto API was too old for the installed Vite version; this is a reproducibility/environment finding.
 
-Live screenshot capture was attempted through the in-app browser, but its security policy blocked `http://127.0.0.1:5173` with `ERR_BLOCKED_BY_CLIENT`. Therefore, this package does **not** label any generated graphic as a live screenshot. The diagrams and source traceability are provided as “other evidence,” consistent with the request.
+The frontend was opened through the in-app browser at `http://127.0.0.1:4173` in mock mode. Twelve live interface captures were recorded after exercising scoring, explanation, fairness, portfolio analysis, borrower rights, outcome feedback, and governance interactions. The images are stored under `screenshots/`, hashed in `evidence/SCREENSHOT_MANIFEST.sha256`, and reproduced with operating notes in Section 9.
 
 For a reviewer with a normal local browser:
 
 ```bash
 cd frontend
 /path/to/modern/node node_modules/vite/bin/vite.js --host 127.0.0.1
-# open http://127.0.0.1:5173
+# open the local URL printed by Vite
 ```
 
-Suggested screenshots to capture in a follow-on evidence run:
+Captured screenshot set:
 
 1. Full dashboard landing view with privacy/responsible-AI messaging.
-2. Completed scoring form and returned score/decision/reason codes.
-3. Explainability panel with feature contributions.
-4. Fairness panel showing group counts and selection/TPR/FPR metrics.
-5. Portfolio workbench summary and top reasons.
-6. Redacted audit table showing hashed identifier and allowlisted payload.
-7. API `/docs` OpenAPI page and `/health` response.
+2. Contract-driven scoring form and model/schema context.
+3. Returned score, decision, threshold, reason codes, and borrower-readable factors.
+4. Explainability contributions beside the synthetic subgroup fairness monitor.
+5. Portfolio workbench summary, reason-code concentration, and cohort preview.
+6. Governance decision lineage with the audit explorer and outcome-feedback workflow.
+7. Borrower-readable rights, dispute, and human-review information.
+8. Complete alternative-data feature grid with directional indicators.
+9. Recorded outcome and governance-refresh confirmation.
+10. Governance monitoring signals for drift, calibration, parity, and explanation stability.
+11. Governance control register with evidence-coverage indicators.
+12. Populated individual-decision and subgroup-fairness summary.
 
 ## 6.6 Documentation evidence
 
@@ -109,7 +116,7 @@ Existing source documentation includes architecture, fairness, governance, threa
 - No complete model card/fairness report for a real model.
 - No penetration test, SBOM, artifact signature, or immutable audit proof.
 - No legally approved adverse-action reason-code document.
-- No live-browser screenshots due to the stated loopback restriction.
+- The screenshot evidence is mock-mode UI evidence; it does not demonstrate a production API, real applicant data, or lender deployment.
 - Pre-existing uncommitted frontend changes were not modified by this documentation work.
 
 ## 6.8 Reproduction checklist

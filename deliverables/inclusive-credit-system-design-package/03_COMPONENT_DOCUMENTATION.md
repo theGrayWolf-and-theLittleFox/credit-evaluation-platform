@@ -99,9 +99,9 @@ This duplication demonstrates experimentation but creates ownership and consiste
 
 ### L. Frontend demonstration console
 
-**Locations:** `frontend/src/App.tsx` and components including `ScoreForm`, `FairnessPanel`, `ExplainabilityPanel`, `AuditTable`, `PortfolioWorkbench`, and `ProgramRoadmap`.  
-**Responsibility:** demonstrate alternative-data inputs, decisions, explanations, fairness summaries, portfolio exploration, and redacted audit records.  
-**Status:** implemented source; local Vite server starts when invoked with the bundled modern Node runtime. Browser capture was blocked by the in-app browser's loopback policy, so no live screenshot is claimed.  
+**Locations:** `frontend/src/App.tsx` and components including `ScoreForm`, `FairnessPanel`, `ExplainabilityPanel`, `AuditTable`, `PortfolioWorkbench`, and `ProgramRoadmap`.
+**Responsibility:** demonstrate alternative-data inputs, decisions, explanations, fairness summaries, portfolio exploration, and redacted audit records.
+**Status:** implemented and exercised in mock mode. The local Vite server was opened through the in-app browser, and twelve views covering landing status, feature input, scoring, borrower rights, explanation, fairness, portfolio analysis, outcomes, governance lineage, monitoring, and control evidence were captured in `screenshots/` and reproduced in Section 9.
 **Production gap:** authenticated session, accessibility conformance, secure credential proxy, CSP/security headers, error/empty states, user research, and borrower-facing notice validation.
 
 ### M. Telemetry and logging

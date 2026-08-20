@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import json
 import re
+import zipfile
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+from xml.etree import ElementTree
 
 from docx import Document
 from docx.enum.section import WD_SECTION
@@ -24,7 +28,23 @@ SOURCES = [
     ROOT / "06_EVIDENCE_INDEX.md",
     ROOT / "07_RISK_REGISTER_AND_ROADMAP.md",
     ROOT / "08_ARCHITECTURE_DIAGRAMS.md",
+    ROOT / "09_PRODUCT_DEMONSTRATION.md",
+    ROOT / "10_SUBMISSION_READINESS.md",
 ]
+EVIDENCE_ROOT = ROOT / "evidence"
+DIAGRAM_ROOT = ROOT / "diagrams"
+DIAGRAM_DEFINITIONS = [
+    ("System context", DIAGRAM_ROOT / "system_context.mmd"),
+    ("Online scoring sequence", DIAGRAM_ROOT / "scoring_sequence.mmd"),
+    ("Production deployment topology", DIAGRAM_ROOT / "production_deployment_topology.mmd"),
+    ("Model lifecycle and governance", DIAGRAM_ROOT / "model_lifecycle_governance.mmd"),
+    ("Data lineage and evidence", DIAGRAM_ROOT / "data_lineage_evidence.mmd"),
+    ("Fairness control loop", DIAGRAM_ROOT / "fairness_control_loop.mmd"),
+]
+CORE_NS = {
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "dcterms": "http://purl.org/dc/terms/",
+}
 
 NAVY = RGBColor(27, 54, 93)
 BLUE = RGBColor(46, 116, 181)
@@ -148,6 +168,7 @@ def add_cover(doc):
     p.paragraph_format.space_after = Pt(60)
     for label, value in (
         ("Repository", "credit-evaluation-platform"),
+        ("Edition", "Submission-ready consolidated technical evidence edition"),
         ("Evidence status", "Reference implementation; synthetic-data demonstration; not production approved"),
     ):
         p = doc.add_paragraph()
@@ -170,6 +191,13 @@ def add_contents(doc):
         "6. Evidence Index",
         "7. Risk Register and Completion Roadmap",
         "8. Architecture Diagram Catalog",
+        "9. Product Demonstration and Operator Walkthrough",
+        "10. Submission Readiness, Traceability, and Acceptance Package",
+        "Appendix A. Test and Training Evidence",
+        "Appendix B. Baseline Training Report",
+        "Appendix C. Model Registry Snapshot",
+        "Appendix D. Editable Diagram Definitions",
+        "Appendix E. Screenshot Integrity Manifest",
     ]
     for item in items:
         p = doc.add_paragraph(style="List Number")
@@ -250,7 +278,9 @@ def add_figure(doc, image_path, caption):
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.keep_together = True
     run = p.add_run()
-    run.add_picture(str(image_path), width=Inches(6.65))
+    picture = run.add_picture(str(image_path), width=Inches(6.65))
+    picture._inline.docPr.set("descr", caption)
+    picture._inline.docPr.set("title", caption)
     cp = doc.add_paragraph()
     cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     cp.paragraph_format.space_before = Pt(2)
@@ -299,6 +329,7 @@ def append_markdown(doc, path, first=False):
         doc.add_page_break()
     i = 0
     diagram_view_seen = False
+    demonstration_view_seen = False
     while i < len(lines):
         line = lines[i].rstrip()
         if line.startswith("```"):
@@ -330,6 +361,10 @@ def append_markdown(doc, path, first=False):
                 if diagram_view_seen:
                     doc.add_page_break()
                 diagram_view_seen = True
+            if line.startswith("## Demonstration screen"):
+                if demonstration_view_seen:
+                    doc.add_page_break()
+                demonstration_view_seen = True
             p = doc.add_heading(line[3:].strip(), level=2)
             for run in p.runs:
                 font(run, 13.5, bold=True, color=BLUE)
@@ -354,6 +389,101 @@ def append_markdown(doc, path, first=False):
         i += 1
 
 
+def add_json_appendix(doc, title, path):
+    doc.add_page_break()
+    heading = doc.add_heading(title, level=1)
+    heading.paragraph_format.space_before = Pt(0)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    p = doc.add_paragraph()
+    add_inline(
+        p,
+        "Machine-readable evidence is reproduced below without interpretation so the printed record can be reconciled with the repository artifact.",
+    )
+    add_code(doc, json.dumps(payload, indent=2, sort_keys=True).splitlines())
+
+
+def add_text_appendix(doc, title, path, introduction):
+    doc.add_page_break()
+    heading = doc.add_heading(title, level=1)
+    heading.paragraph_format.space_before = Pt(0)
+    p = doc.add_paragraph()
+    add_inline(p, introduction)
+    add_code(doc, path.read_text(encoding="utf-8").splitlines())
+
+
+def add_evidence_appendices(doc):
+    append_markdown(doc, EVIDENCE_ROOT / "TEST_RESULTS.md")
+    first_heading = next(
+        (paragraph for paragraph in reversed(doc.paragraphs) if paragraph.style.name == "Heading 1"),
+        None,
+    )
+    if first_heading is not None:
+        first_heading.text = "Appendix A. Test and Training Evidence"
+        for run in first_heading.runs:
+            font(run, 17, bold=True, color=NAVY)
+
+    add_json_appendix(
+        doc,
+        "Appendix B. Baseline Training Report",
+        EVIDENCE_ROOT / "latest_train_report.json",
+    )
+    add_json_appendix(
+        doc,
+        "Appendix C. Model Registry Snapshot",
+        EVIDENCE_ROOT / "model_registry.json",
+    )
+
+    doc.add_page_break()
+    heading = doc.add_heading("Appendix D. Editable Diagram Definitions", level=1)
+    heading.paragraph_format.space_before = Pt(0)
+    p = doc.add_paragraph()
+    add_inline(
+        p,
+        "The rendered diagrams in Section 8 are the print views. The Mermaid definitions below are the complete editable graph sources used to regenerate those views.",
+    )
+    for index, (label, path) in enumerate(DIAGRAM_DEFINITIONS):
+        if index:
+            doc.add_page_break()
+        heading = doc.add_heading(label, level=2)
+        heading.paragraph_format.space_before = Pt(0)
+        p = doc.add_paragraph()
+        font(p.add_run(f"Source file: diagrams/{path.name}"), 9.5, italic=True, color=SLATE)
+        add_code(doc, path.read_text(encoding="utf-8").splitlines())
+
+    add_text_appendix(
+        doc,
+        "Appendix E. Screenshot Integrity Manifest",
+        EVIDENCE_ROOT / "SCREENSHOT_MANIFEST.sha256",
+        "The SHA-256 values below identify the twelve live mock-mode product captures embedded in Section 9. Verify them from the package root with `shasum -a 256 -c evidence/SCREENSHOT_MANIFEST.sha256`.",
+    )
+
+
+def scrub_core_timestamps(path):
+    with zipfile.ZipFile(path, "r") as source:
+        core = ElementTree.fromstring(source.read("docProps/core.xml"))
+        for qualified_name in (
+            f"{{{CORE_NS['dcterms']}}}created",
+            f"{{{CORE_NS['dcterms']}}}modified",
+            f"{{{CORE_NS['dc']}}}description",
+        ):
+            node = core.find(qualified_name)
+            if node is not None:
+                core.remove(node)
+        core_xml = ElementTree.tostring(core, encoding="utf-8", xml_declaration=True)
+
+        with NamedTemporaryFile(dir=path.parent, suffix=".docx", delete=False) as temporary:
+            temporary_path = Path(temporary.name)
+        try:
+            with zipfile.ZipFile(temporary_path, "w") as target:
+                for item in source.infolist():
+                    payload = core_xml if item.filename == "docProps/core.xml" else source.read(item.filename)
+                    target.writestr(item, payload)
+            temporary_path.replace(path)
+        finally:
+            if temporary_path.exists():
+                temporary_path.unlink()
+
+
 def main():
     doc = Document()
     configure(doc)
@@ -361,12 +491,14 @@ def main():
     add_contents(doc)
     for index, source in enumerate(SOURCES):
         append_markdown(doc, source, first=index == 0)
+    add_evidence_appendices(doc)
     props = doc.core_properties
     props.title = "Inclusive Credit Evaluation Platform — Technical Evidence Dossier"
     props.subject = "Architecture, specifications, model development, fairness testing, and implementation evidence"
     props.author = "Open Source Project Documentation"
     props.keywords = "credit, alternative data, responsible AI, fairness, model risk, architecture"
     doc.save(OUT)
+    scrub_core_timestamps(OUT)
     print(OUT)
 
 
