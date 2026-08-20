@@ -1,0 +1,20 @@
+{
+  "current": {
+    "name": "sklearn_logreg_baseline",
+    "version": "0.0.1"
+  },
+  "models": [
+    {
+      "artifact_path": "artifacts/models/baseline.joblib",
+      "decision_threshold": 0.5,
+      "fairness": {},
+      "feature_schema_hash": "a991402390c9a9aa",
+      "metrics": {
+        "roc_auc": 0.56588288
+      },
+      "name": "sklearn_logreg_baseline",
+      "notes": "Synthetic/demo baseline training run.",
+      "version": "0.0.1"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant LOS as Lender / LOS
+    participant GW as API edge
+    participant API as Scoring service
+    participant FC as Feature Contract
+    participant M as Approved Model + Policy
+    participant X as Explainer
+    participant A as Audit Writer
+    LOS->>GW: POST /v1/score + client identity + idempotency key
+    GW->>GW: Authenticate tenant; authorize product and endpoint; enforce limits
+    GW->>API: Canonical request + tenant context + correlation ID
+    API->>FC: Validate names, types, bounds, missingness, and unknown fields
+    FC-->>API: Ordered vector + feature-schema hash
+    API->>M: Load approved artifact; verify signature/digest/schema; predict
+    M-->>API: Score + artifact version + policy version + threshold
+    API->>X: Explain the same scored vector and model version
+    X-->>API: Ranked contributions + versioned reason codes
+    API->>A: Tokenized applicant ID + versions + score + reasons + feature hash
+    A-->>API: Durable audit event ID
+    API-->>GW: Recommendation + evidence identifiers
+    GW-->>LOS: HTTP result + request ID
+    alt Unknown tenant, invalid schema, unapproved artifact, or required audit failure
+      GW-->>LOS: Deterministic error; no fallback model; no partial decision
+    end

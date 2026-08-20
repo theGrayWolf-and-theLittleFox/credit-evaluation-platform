@@ -1,0 +1,374 @@
+from __future__ import annotations
+
+import re
+from pathlib import Path
+
+from docx import Document
+from docx.enum.section import WD_SECTION
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import Inches, Pt, RGBColor
+
+
+ROOT = Path(__file__).resolve().parent
+OUT = ROOT / "Inclusive_Credit_Platform_Technical_Dossier.docx"
+SOURCES = [
+    ROOT / "README.md",
+    ROOT / "01_SYSTEM_ARCHITECTURE.md",
+    ROOT / "02_TECHNICAL_SPECIFICATIONS.md",
+    ROOT / "03_COMPONENT_DOCUMENTATION.md",
+    ROOT / "04_MODEL_DEVELOPMENT_AND_TESTING.md",
+    ROOT / "05_FAIRNESS_AND_BIAS_TESTING.md",
+    ROOT / "06_EVIDENCE_INDEX.md",
+    ROOT / "07_RISK_REGISTER_AND_ROADMAP.md",
+    ROOT / "08_ARCHITECTURE_DIAGRAMS.md",
+]
+
+NAVY = RGBColor(27, 54, 93)
+BLUE = RGBColor(46, 116, 181)
+SLATE = RGBColor(80, 90, 105)
+LIGHT = "E8EEF5"
+
+
+def font(run, size=11, bold=False, italic=False, color=None):
+    run.font.name = "Calibri"
+    run._element.get_or_add_rPr().rFonts.set(qn("w:ascii"), "Calibri")
+    run._element.get_or_add_rPr().rFonts.set(qn("w:hAnsi"), "Calibri")
+    run.font.size = Pt(size)
+    run.bold = bold
+    run.italic = italic
+    if color:
+        run.font.color.rgb = color
+
+
+def shade(cell, fill):
+    tc_pr = cell._tc.get_or_add_tcPr()
+    shd = tc_pr.find(qn("w:shd"))
+    if shd is None:
+        shd = OxmlElement("w:shd")
+        tc_pr.append(shd)
+    shd.set(qn("w:fill"), fill)
+
+
+def set_cell_margins(cell, top=80, start=120, bottom=80, end=120):
+    tc = cell._tc
+    tc_pr = tc.get_or_add_tcPr()
+    tc_mar = tc_pr.first_child_found_in("w:tcMar")
+    if tc_mar is None:
+        tc_mar = OxmlElement("w:tcMar")
+        tc_pr.append(tc_mar)
+    for name, value in (("top", top), ("start", start), ("bottom", bottom), ("end", end)):
+        node = tc_mar.find(qn(f"w:{name}"))
+        if node is None:
+            node = OxmlElement(f"w:{name}")
+            tc_mar.append(node)
+        node.set(qn("w:w"), str(value))
+        node.set(qn("w:type"), "dxa")
+
+
+def set_repeat_table_header(row):
+    tr_pr = row._tr.get_or_add_trPr()
+    tbl_header = OxmlElement("w:tblHeader")
+    tbl_header.set(qn("w:val"), "true")
+    tr_pr.append(tbl_header)
+
+
+def add_page_number(paragraph):
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    run = paragraph.add_run("Page ")
+    font(run, 9, color=SLATE)
+    fld_char = OxmlElement("w:fldChar")
+    fld_char.set(qn("w:fldCharType"), "begin")
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = "PAGE"
+    fld_end = OxmlElement("w:fldChar")
+    fld_end.set(qn("w:fldCharType"), "end")
+    run._r.append(fld_char)
+    run._r.append(instr)
+    run._r.append(fld_end)
+
+
+def configure(doc):
+    section = doc.sections[0]
+    section.page_width = Inches(8.5)
+    section.page_height = Inches(11)
+    section.top_margin = Inches(0.82)
+    section.bottom_margin = Inches(0.72)
+    section.left_margin = Inches(0.88)
+    section.right_margin = Inches(0.88)
+    section.header_distance = Inches(0.36)
+    section.footer_distance = Inches(0.36)
+
+    styles = doc.styles
+    normal = styles["Normal"]
+    normal.font.name = "Calibri"
+    normal.font.size = Pt(10.5)
+    normal.paragraph_format.space_after = Pt(5)
+    normal.paragraph_format.line_spacing = 1.08
+
+    for name, size, before, after, color in (
+        ("Heading 1", 17, 16, 8, NAVY),
+        ("Heading 2", 13.5, 12, 6, BLUE),
+        ("Heading 3", 11.5, 8, 4, NAVY),
+    ):
+        style = styles[name]
+        style.font.name = "Calibri"
+        style.font.size = Pt(size)
+        style.font.bold = True
+        style.font.color.rgb = color
+        style.paragraph_format.space_before = Pt(before)
+        style.paragraph_format.space_after = Pt(after)
+        style.paragraph_format.keep_with_next = True
+
+    for sec in doc.sections:
+        hp = sec.header.paragraphs[0]
+        hp.text = "INCLUSIVE CREDIT PLATFORM  |  TECHNICAL EVIDENCE DOSSIER"
+        hp.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        font(hp.runs[0], 8.5, bold=True, color=SLATE)
+        add_page_number(sec.footer.paragraphs[0])
+
+
+def add_cover(doc):
+    for _ in range(5):
+        doc.add_paragraph()
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    font(p.add_run("TECHNICAL EVIDENCE DOSSIER"), 12, bold=True, color=BLUE)
+    p.paragraph_format.space_after = Pt(18)
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    font(p.add_run("Inclusive Credit Evaluation Platform"), 28, bold=True, color=NAVY)
+    p.paragraph_format.space_after = Pt(10)
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    font(p.add_run("Architecture, specifications, model development, fairness testing, and implementation evidence"), 14, color=SLATE)
+    p.paragraph_format.space_after = Pt(60)
+    for label, value in (
+        ("Repository", "credit-evaluation-platform"),
+        ("Evidence status", "Reference implementation; synthetic-data demonstration; not production approved"),
+    ):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        font(p.add_run(f"{label}: "), 10, bold=True, color=NAVY)
+        font(p.add_run(value), 10, color=SLATE)
+    doc.add_page_break()
+
+
+def add_contents(doc):
+    p = doc.add_heading("Contents", level=1)
+    p.paragraph_format.space_before = Pt(0)
+    items = [
+        "Executive package overview",
+        "1. System Architecture",
+        "2. Technical Specifications",
+        "3. Component Documentation",
+        "4. Model Development and Testing",
+        "5. Fairness and Bias Testing",
+        "6. Evidence Index",
+        "7. Risk Register and Completion Roadmap",
+        "8. Architecture Diagram Catalog",
+    ]
+    for item in items:
+        p = doc.add_paragraph(style="List Number")
+        p.paragraph_format.space_after = Pt(5)
+        font(p.add_run(item), 11)
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(18)
+    font(p.add_run("Evidence convention. "), 10.5, bold=True, color=NAVY)
+    font(p.add_run("Implemented claims are separated from scaffolding and planned capabilities. This dossier does not treat roadmap commitments as completed work."), 10.5)
+    doc.add_page_break()
+
+
+def add_inline(paragraph, text):
+    parts = re.split(r"(`[^`]+`|\*\*[^*]+\*\*)", text)
+    for part in parts:
+        if not part:
+            continue
+        if part.startswith("`") and part.endswith("`"):
+            run = paragraph.add_run(part[1:-1])
+            font(run, 9.2, color=NAVY)
+            run.font.name = "Courier New"
+        elif part.startswith("**") and part.endswith("**"):
+            font(paragraph.add_run(part[2:-2]), 10.5, bold=True)
+        else:
+            font(paragraph.add_run(part), 10.5)
+
+
+def add_table(doc, rows):
+    parsed = [[c.strip() for c in row.strip().strip("|").split("|")] for row in rows]
+    if len(parsed) > 1 and all(set(c) <= set("-: ") for c in parsed[1]):
+        parsed.pop(1)
+    cols = max(len(r) for r in parsed)
+    table = doc.add_table(rows=0, cols=cols)
+    table.style = "Table Grid"
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table.autofit = False
+    widths = [Inches(6.74 / cols)] * cols
+    for ridx, row in enumerate(parsed):
+        cells = table.add_row().cells
+        for idx in range(cols):
+            cell = cells[idx]
+            cell.width = widths[idx]
+            cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.TOP
+            set_cell_margins(cell)
+            text = row[idx] if idx < len(row) else ""
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_after = Pt(0)
+            add_inline(p, text)
+            for run in p.runs:
+                run.font.size = Pt(8.6)
+                if ridx == 0:
+                    run.bold = True
+                    run.font.color.rgb = NAVY
+            if ridx == 0:
+                shade(cell, LIGHT)
+        if ridx == 0:
+            set_repeat_table_header(table.rows[0])
+    doc.add_paragraph().paragraph_format.space_after = Pt(1)
+
+
+def add_code(doc, lines):
+    table = doc.add_table(rows=1, cols=1)
+    table.style = "Table Grid"
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    cell = table.cell(0, 0)
+    shade(cell, "F5F7FA")
+    set_cell_margins(cell, top=100, bottom=100, start=140, end=140)
+    p = cell.paragraphs[0]
+    p.paragraph_format.space_after = Pt(0)
+    run = p.add_run("\n".join(lines))
+    run.font.name = "Courier New"
+    run.font.size = Pt(8.2)
+    doc.add_paragraph().paragraph_format.space_after = Pt(1)
+
+
+def add_figure(doc, image_path, caption):
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.keep_together = True
+    run = p.add_run()
+    run.add_picture(str(image_path), width=Inches(6.65))
+    cp = doc.add_paragraph()
+    cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    cp.paragraph_format.space_before = Pt(2)
+    cp.paragraph_format.space_after = Pt(8)
+    cp.paragraph_format.keep_with_next = True
+    font(cp.add_run(caption), 9, italic=True, color=SLATE)
+
+
+def new_numbering_id(doc):
+    numbering = doc.part.numbering_part.element
+    existing = [int(n.get(qn("w:numId"))) for n in numbering.findall(qn("w:num"))]
+    num_id = max(existing, default=0) + 1
+    abstract_id = 0
+    style = doc.styles["List Number"]
+    num_pr = style.element.pPr.numPr if style.element.pPr is not None else None
+    if num_pr is not None and num_pr.numId is not None:
+        base_num_id = num_pr.numId.val
+        base_num = next((n for n in numbering.findall(qn("w:num")) if int(n.get(qn("w:numId"))) == base_num_id), None)
+        if base_num is not None:
+            abstract_id = int(base_num.find(qn("w:abstractNumId")).get(qn("w:val")))
+    num = OxmlElement("w:num")
+    num.set(qn("w:numId"), str(num_id))
+    abstract = OxmlElement("w:abstractNumId")
+    abstract.set(qn("w:val"), str(abstract_id))
+    num.append(abstract)
+    override = OxmlElement("w:lvlOverride")
+    override.set(qn("w:ilvl"), "0")
+    start = OxmlElement("w:startOverride")
+    start.set(qn("w:val"), "1")
+    override.append(start)
+    num.append(override)
+    numbering.append(num)
+    return num_id
+
+
+def apply_num_id(paragraph, num_id):
+    p_pr = paragraph._p.get_or_add_pPr()
+    num_pr = p_pr.get_or_add_numPr()
+    num_pr.get_or_add_ilvl().val = 0
+    num_pr.get_or_add_numId().val = num_id
+
+
+def append_markdown(doc, path, first=False):
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not first:
+        doc.add_page_break()
+    i = 0
+    diagram_view_seen = False
+    while i < len(lines):
+        line = lines[i].rstrip()
+        if line.startswith("```"):
+            block = []
+            i += 1
+            while i < len(lines) and not lines[i].startswith("```"):
+                block.append(lines[i])
+                i += 1
+            add_code(doc, block)
+        elif line.startswith("|"):
+            rows = []
+            while i < len(lines) and lines[i].startswith("|"):
+                rows.append(lines[i])
+                i += 1
+            add_table(doc, rows)
+            continue
+        elif line.startswith("!["):
+            match = re.match(r"!\[([^]]+)\]\(([^)]+)\)", line)
+            if match:
+                caption, relative_path = match.groups()
+                add_figure(doc, path.parent / relative_path, caption)
+        elif line.startswith("# "):
+            p = doc.add_heading(line[2:].strip(), level=1)
+            p.paragraph_format.space_before = Pt(0)
+            for run in p.runs:
+                font(run, 17, bold=True, color=NAVY)
+        elif line.startswith("## "):
+            if line.startswith("## Architecture view"):
+                if diagram_view_seen:
+                    doc.add_page_break()
+                diagram_view_seen = True
+            p = doc.add_heading(line[3:].strip(), level=2)
+            for run in p.runs:
+                font(run, 13.5, bold=True, color=BLUE)
+        elif line.startswith("### "):
+            p = doc.add_heading(line[4:].strip(), level=3)
+            for run in p.runs:
+                font(run, 11.5, bold=True, color=NAVY)
+        elif re.match(r"^\d+\. ", line):
+            num_id = new_numbering_id(doc)
+            while i < len(lines) and re.match(r"^\d+\. ", lines[i].rstrip()):
+                p = doc.add_paragraph(style="List Number")
+                apply_num_id(p, num_id)
+                add_inline(p, re.sub(r"^\d+\. ", "", lines[i].rstrip()))
+                i += 1
+            continue
+        elif line.startswith("- "):
+            p = doc.add_paragraph(style="List Bullet")
+            add_inline(p, line[2:])
+        elif line.strip():
+            p = doc.add_paragraph()
+            add_inline(p, line)
+        i += 1
+
+
+def main():
+    doc = Document()
+    configure(doc)
+    add_cover(doc)
+    add_contents(doc)
+    for index, source in enumerate(SOURCES):
+        append_markdown(doc, source, first=index == 0)
+    props = doc.core_properties
+    props.title = "Inclusive Credit Evaluation Platform — Technical Evidence Dossier"
+    props.subject = "Architecture, specifications, model development, fairness testing, and implementation evidence"
+    props.author = "Open Source Project Documentation"
+    props.keywords = "credit, alternative data, responsible AI, fairness, model risk, architecture"
+    doc.save(OUT)
+    print(OUT)
+
+
+if __name__ == "__main__":
+    main()

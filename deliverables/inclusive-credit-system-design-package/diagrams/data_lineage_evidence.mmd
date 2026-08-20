@@ -1,0 +1,14 @@
+flowchart TD
+  S[Permissioned sources<br/>provider record, consent reference, coverage] --> R[(Raw landing zone<br/>checksum, manifest, restricted access)]
+  R --> V[Validated snapshot<br/>quality result, reconciliation, immutable ID]
+  V --> F[Feature pipeline<br/>versioned transforms, missingness, ordering]
+  F --> C[Feature contract<br/>type, unit, range, lookback, source, reason mapping, hash]
+  V --> TM[Training matrix<br/>snapshot ID, split hash, feature hash, target]
+  V --> SM[Sensitive monitoring enclave<br/>protected or proxy attributes, tokenized join]
+  C --> O[(Outcome store<br/>label definition, maturity, correction, provenance)]
+  TM --> A[Model artifact<br/>pipeline, dependencies, digest, signature]
+  A --> G[Registry record<br/>artifact digest, feature hash, threshold, reports, approvals]
+  G --> D[Decision audit event<br/>token ID, request ID, versions, score, reasons, integrity seal]
+  D --> M[Monitoring record<br/>outcomes, group metrics, uncertainty, drift, disposition]
+  SM -. restricted aggregate join .-> M
+  O --> M

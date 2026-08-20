@@ -1,0 +1,15 @@
+flowchart TD
+  A[Data snapshot<br/>provenance, consent, scope, label maturity] --> B[Feature build<br/>contract, transforms, leakage and proxy review]
+  B --> C[Candidate training<br/>baseline, challenger, convergence, reproducibility]
+  C --> D[Evaluation<br/>performance, calibration, stability, stress]
+  D --> E[Fairness review<br/>selection, error, calibration, uncertainty]
+  E --> F[Independent validation<br/>conceptual soundness, implementation, outcomes]
+  F --> G{Approval gate}
+  G -->|approved| H[Registry publication<br/>signed artifact, digest, policy, limitations]
+  G -->|rejected or conditioned| B
+  H --> I[Controlled serving<br/>canary, monitoring, rollback]
+  I --> J{Monitoring breach?}
+  J -->|no| I
+  J -->|yes| K[Freeze promotion<br/>preserve evidence<br/>assess harm]
+  K -->|rollback| H
+  K -->|data or model defect| A

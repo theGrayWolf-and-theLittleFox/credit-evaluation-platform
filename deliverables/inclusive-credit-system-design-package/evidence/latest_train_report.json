@@ -1,0 +1,9 @@
+{
+  "feature_schema_hash": "a991402390c9a9aa",
+  "metrics": {
+    "roc_auc": 0.56588288
+  },
+  "model_name": "sklearn_logreg_baseline",
+  "model_version": "0.0.1",
+  "notes": "Synthetic/demo baseline training run."
+}

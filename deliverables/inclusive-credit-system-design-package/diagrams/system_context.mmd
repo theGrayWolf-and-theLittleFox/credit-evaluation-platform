@@ -1,0 +1,20 @@
+flowchart LR
+    Applicant[Applicant / borrower] -->|authorization and application| Lender[Lender / LOS]
+    Provider[Rent, utility, cash-flow providers] -->|permissioned aggregates + provenance| Edge
+    Lender -->|authenticated request + idempotency key| Edge[API edge<br/>tenant authorization, schema, rate and replay controls]
+
+    subgraph Platform[Platform trust boundary]
+      Edge --> Contract[Feature contract<br/>types, ranges, missingness, ordering, schema hash]
+      Contract --> Decision[Decision service<br/>approved model + versioned threshold policy]
+      Decision --> Explain[Explanation service<br/>local contributions + reason dictionary]
+      Decision --> Audit[(Audit plane<br/>minimal event + integrity seal)]
+      Explain --> Audit
+      Audit --> Monitor[Monitoring plane<br/>outcomes, drift, calibration, subgroup metrics]
+      Control[Model control plane<br/>training, validation, registry, approval, rollback] -. approved artifact .-> Decision
+      Control -. metric definitions .-> Monitor
+    end
+
+    Explain -->|score, recommendation, reasons, versions| Lender
+    Lender -->|final action, notice, review, appeal path| Applicant
+    Monitor --> Governance[Model risk, fair lending, compliance, security, operations]
+    Governance -. approval, condition, rejection, rollback .-> Control

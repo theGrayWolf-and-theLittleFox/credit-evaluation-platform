@@ -1,0 +1,13 @@
+flowchart LR
+  A[Cohort assembly<br/>product, population, policy, outcome, exclusions] --> B[Data checks<br/>counts, missingness, provider coverage, token linkage]
+  B --> C[Metric engine<br/>selection, TPR/FPR, predictive value, calibration, reason rates]
+  C --> D[Statistical layer<br/>confidence intervals, practical effect, multiple testing, stability]
+  D --> E{Approved trigger breached?}
+  E -->|no| A
+  E -->|yes| F[Root-cause analysis<br/>coverage, proxies, labels, model, threshold, overrides]
+  F --> G[Mitigation experiment<br/>data repair, feature change, constraint, recalibration, process]
+  G --> H{Governance disposition}
+  H -->|approve or condition| A
+  H -->|reject| F
+  H -->|rollback| I[Restore approved model and policy<br/>preserve incident evidence]
+  I --> A

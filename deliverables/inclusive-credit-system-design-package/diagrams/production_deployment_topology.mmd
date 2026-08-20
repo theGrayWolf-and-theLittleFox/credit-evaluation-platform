@@ -1,0 +1,36 @@
+flowchart LR
+  subgraph Edge[Edge zone]
+    Gateway[API gateway<br/>TLS or mTLS, OAuth, WAF, rate limit, idempotency]
+    Authz[Tenant authorizer<br/>institution, environment, role, product, endpoint]
+    Guard[Request controls<br/>schema size, replay cache, correlation ID]
+  end
+
+  subgraph Online[Private online service zone]
+    Score[Scoring replicas<br/>stateless, autoscaled, health-checked]
+    Loader[Artifact loader<br/>signature, digest, schema compatibility, LKG]
+    Explain[Explanation service<br/>approved method + reason dictionary]
+    Telemetry[Telemetry agent<br/>metrics/traces without raw features]
+    Queue[(Durable audit queue<br/>deduplication, back-pressure, DLQ)]
+  end
+
+  subgraph Evidence[Evidence data zone]
+    Registry[(Model registry<br/>approval, versions, digest, feature hash)]
+    Audit[(Immutable audit store<br/>append-only access, retention, seal)]
+    Monitor[(Monitoring warehouse<br/>tokenized outcomes, aggregates, drift)]
+  end
+
+  subgraph Offline[Offline control zone]
+    Train[Training jobs<br/>immutable snapshots, pinned image]
+    Validate[Validation jobs<br/>performance, calibration, fairness, stability]
+    Promote[Promotion workflow<br/>dual control, signed artifact, rollback]
+  end
+
+  Gateway --> Authz --> Guard --> Score
+  Score --> Loader --> Registry
+  Score --> Explain
+  Score --> Telemetry
+  Score --> Queue --> Audit
+  Train --> Validate --> Promote --> Registry
+  Registry --> Loader
+  Audit --> Monitor
+  Monitor -. governed trigger .-> Promote
