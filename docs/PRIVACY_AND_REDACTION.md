@@ -8,6 +8,15 @@ This project is an open-source, non-commercial platform to help mission-driven l
 - Allowlist only the outcome- and fairness-related fields that audits need.
 - Truncate long strings and drop unexpected keys to prevent accidental PII capture.
 - Make redaction policy configurable via environment variables for different jurisdictions.
+- Use pseudonymous application references at API boundaries; reject values resembling direct identifiers.
+- Keep public project content limited to the platform's technical, lending, and responsible-AI purpose.
+
+### API privacy defaults
+- Application references are hashed before JSONL or SQLite audit persistence.
+- Sensitive monitoring attributes are not persisted by default.
+- Email addresses, phone-like values, government-ID-like values, and names with spaces are rejected as application references.
+- `ICE_AUDIT_IDENTIFIER_SALT` can supply a deployment-specific salt for stable audit joins.
+- The CI public-content policy scans tracked text files and blocks restricted personal-case framing.
 
 ### Redaction controls (defaults are privacy-first)
 The API and CLI now construct `PIIRedactor` instances for every audit write. Defaults:
@@ -39,4 +48,3 @@ Environment variables map directly to `Settings` fields in `src/mie_credit_platf
 - **Fairness & explainability:** retain only aggregated fairness metrics and human-readable reason codes to support ECOA/FCRA-style adverse action reasoning without exposing sensitive attributes.
 - **Security:** hashed identifiers and truncation reduce blast radius if audit stores are exfiltrated.
 - **Governance:** configuration is code-driven and auditable; defaults favor privacy and can be tightened for specific partners or regions.
-

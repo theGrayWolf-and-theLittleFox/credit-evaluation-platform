@@ -15,6 +15,8 @@ from ice.audit.store import (
     utcnow,
 )
 from services.api.analytics import analyze_portfolio, build_fairness_report, describe_contract, score_application
+from services.api.governance import build_governance_summary
+from services.api.privacy import hash_audit_identifier, validate_pseudonymous_reference
 from services.api.schemas import (
     AuditEventListResponse,
     AuditEventRecord,
@@ -23,6 +25,7 @@ from services.api.schemas import (
     FairnessReportRequest,
     FairnessReportResponse,
     FeatureContractResponse,
+    GovernanceSummaryResponse,
     ModelInfo,
     OutcomeEventIn,
     PortfolioAnalysisRequest,
@@ -50,6 +53,14 @@ def _load_current_model():
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
+def _audit_application_id(application_id: str) -> str:
+    settings = api_settings()
+    application_id = validate_pseudonymous_reference(application_id)
+    if not settings.hash_audit_identifiers:
+        return application_id
+    return hash_audit_identifier(application_id, settings.audit_identifier_salt)
+
+
 def _score_response(req: ScoreRequest, request_id: str, created_at: datetime) -> ScoreResponse:
     settings = api_settings()
     model = _load_current_model()
@@ -65,7 +76,7 @@ def _score_response(req: ScoreRequest, request_id: str, created_at: datetime) ->
 
     event = DecisionEvent(
         event_type="decision",
-        application_id=req.application_id,
+        application_id=_audit_application_id(req.application_id),
         request_id=request_id,
         model_name=model.metadata.name,
         model_version=model.metadata.version,
@@ -147,7 +158,7 @@ def explain_endpoint(req: ExplainRequest) -> ExplainResponse:
             event_type="explain",
             created_at=created_at,
             request_id=request_id,
-            application_id=req.application_id,
+            application_id=_audit_application_id(req.application_id),
             model_name=model.metadata.name,
             model_version=model.metadata.version,
             payload={
@@ -256,7 +267,7 @@ def audit_events(
         limit=bounded_limit,
         offset=bounded_offset,
         event_type=event_type,
-        application_id=application_id,
+        application_id=_audit_application_id(application_id) if application_id else None,
         request_id=request_id,
         model_version=model_version,
     )
@@ -268,12 +279,19 @@ def audit_events(
     )
 
 
+@router.get("/governance/summary", response_model=GovernanceSummaryResponse)
+def governance_summary() -> GovernanceSummaryResponse:
+    settings = api_settings()
+    result = list_jsonl_events(settings.audit_log_path, limit=250, offset=0)
+    return GovernanceSummaryResponse(**build_governance_summary(result["events"]))
+
+
 @router.post("/audit/events")
 def ingest_outcome(event_in: OutcomeEventIn) -> dict:
     settings = api_settings()
     event = OutcomeEvent(
         event_type="outcome",
-        application_id=event_in.application_id,
+        application_id=_audit_application_id(event_in.application_id),
         outcome_type=event_in.outcome_type,
         outcome_value=int(event_in.outcome_value),
         created_at=utcnow(),

@@ -8,6 +8,7 @@ import {
   PortfolioApplicationInput,
   ScorePayload,
   ScoreResult,
+  OutcomePayload,
 } from "./types";
 import {
   USE_API,
@@ -16,8 +17,10 @@ import {
   fetchExplanation,
   fetchFeatureContract,
   fetchHealth,
+  fetchGovernanceSummary,
   fetchModelInfo,
   scoreApplicant,
+  submitOutcome,
 } from "./lib/api";
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
@@ -27,6 +30,10 @@ import { AuditTable } from "./components/AuditTable";
 import { FairnessPanel } from "./components/FairnessPanel";
 import { ExplainabilityPanel } from "./components/ExplainabilityPanel";
 import { PortfolioWorkbench } from "./components/PortfolioWorkbench";
+import { ProgramRoadmap } from "./components/ProgramRoadmap";
+import { GovernanceCenter } from "./components/GovernanceCenter";
+import { BorrowerTransparency } from "./components/BorrowerTransparency";
+import { OutcomeTracker } from "./components/OutcomeTracker";
 
 export default function App() {
   const [score, setScore] = useState<ScoreResult | null>(null);
@@ -70,6 +77,11 @@ export default function App() {
   const hasLoadedContract = useMemo(() => Boolean(contractQuery.data?.feature_definitions.length), [contractQuery.data]);
   const fairnessSignature = fairness ? fairness.groups.join("|") : "";
   const portfolioSize = portfolio?.summary.total_applications ?? 0;
+
+  const governanceQuery = useQuery({
+    queryKey: ["governance-summary", score?.request_id, fairnessSignature],
+    queryFn: fetchGovernanceSummary,
+  });
 
   useEffect(() => {
     refetchAudit();
@@ -127,6 +139,11 @@ export default function App() {
     }
   }
 
+  async function handleOutcome(payload: OutcomePayload) {
+    await submitOutcome(payload);
+    await Promise.all([refetchAudit(), governanceQuery.refetch()]);
+  }
+
   return (
     <div className="app-shell">
       <Navbar mode={mode} onPrimaryAction={() => document.getElementById("score-workbench")?.scrollIntoView({ behavior: "smooth" })} />
@@ -137,7 +154,11 @@ export default function App() {
         mode={mode}
       />
 
+      <ProgramRoadmap />
+
       <MetricsGrid score={score} fairness={fairness} />
+
+      <BorrowerTransparency score={score} />
 
       {error && <div className="error-banner">{error}</div>}
 
@@ -164,6 +185,10 @@ export default function App() {
         result={portfolio}
         onRun={handlePortfolioRun}
       />
+
+      <OutcomeTracker applicationId={score?.application_id} onSubmit={handleOutcome} />
+
+      <GovernanceCenter summary={governanceQuery.data ?? null} loading={governanceQuery.isLoading} />
 
       <AuditTable
         events={auditQuery.data?.events ?? []}

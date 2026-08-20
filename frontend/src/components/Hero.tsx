@@ -19,18 +19,18 @@ export function Hero({ health, modelInfo, contract, mode }: Props) {
           <span className="badge">{mode === "live" ? "Live API" : "Mock mode"}</span>
           <span className="badge">Alt-data</span>
           <span className="badge">Explainable</span>
-          <span className="badge">Portfolio analytics</span>
+          <span className="badge">FCRA / ECOA aligned</span>
         </div>
-        <h1 className="hero-title">Credit decisions, explanations, and monitoring in one working console.</h1>
+        <h1 className="hero-title">A fairer path to credit starts with signals people already create.</h1>
         <p className="muted hero-blurb">
-          Score individual applicants, inspect model contributions, generate fairness snapshots, and run portfolio
-          analysis against the active feature contract without storing direct personal identifiers in the UI.
+          Open, auditable infrastructure helps community lenders evaluate people beyond a traditional credit file—using
+          permissioned rent, utility, and cash-flow data with understandable decisions and continuous safeguards.
         </p>
         <div className="hero-chip-row">
-          <div className="chip">Contract-driven intake</div>
-          <div className="chip">Reason codes + contributions</div>
-          <div className="chip">Synthetic cohort stress tests</div>
-          <div className="chip">Audit event playback</div>
+          <div className="chip">Rental history</div>
+          <div className="chip">Utility payments</div>
+          <div className="chip">Verified cash flow</div>
+          <div className="chip">Borrower-readable reasons</div>
         </div>
       </div>
 

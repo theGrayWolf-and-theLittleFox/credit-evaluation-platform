@@ -166,3 +166,38 @@ export type PortfolioAnalysisResult = {
   applications: PortfolioApplicationResult[];
   fairness: FairnessReport | null;
 };
+
+export type GovernanceControlResult = {
+  id: string;
+  label: string;
+  value: number;
+  threshold: number;
+  status: "passing" | "review" | "insufficient_data";
+};
+
+export type GovernanceSummary = {
+  overall_status: "passing" | "review" | "insufficient_data";
+  readiness: number;
+  event_count: number;
+  event_counts: Record<string, number>;
+  decision_count: number;
+  approval_rate: number;
+  explanation_coverage: number;
+  outcome_coverage: number;
+  latest_fairness: {
+    demographic_parity_difference: number | null;
+    equal_opportunity_difference: number | null;
+    groups: string[];
+  };
+  controls: GovernanceControlResult[];
+};
+
+export type OutcomePayload = {
+  application_id: string;
+  outcome_type: "repayment_30d" | "repayment_90d" | "repayment_180d" | "repayment_12m";
+  outcome_value: 0 | 1;
+  extra?: {
+    observed_at?: string;
+    source?: string;
+  };
+};

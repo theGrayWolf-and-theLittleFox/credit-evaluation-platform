@@ -144,6 +144,12 @@ def test_train_and_monitoring_flow(tmp_path, monkeypatch):
     assert outcome_response.status_code == 200, outcome_response.text
     assert outcome_response.json() == {"status": "ok"}
 
+    invalid_outcome_response = client.post(
+        "/v1/audit/events",
+        json={"application_id": "app_test", "outcome_type": "unknown_window", "outcome_value": 1},
+    )
+    assert invalid_outcome_response.status_code == 422
+
     audit_response = client.get("/v1/audit/events?limit=10")
     assert audit_response.status_code == 200, audit_response.text
     audit_body = audit_response.json()
@@ -151,3 +157,16 @@ def test_train_and_monitoring_flow(tmp_path, monkeypatch):
     event_types = {event["event_type"] for event in audit_body["events"]}
     assert {"decision", "explain", "fairness_report", "portfolio_analysis", "outcome"} <= event_types
 
+    governance_response = client.get("/v1/governance/summary")
+    assert governance_response.status_code == 200, governance_response.text
+    governance_body = governance_response.json()
+    assert governance_body["event_count"] >= 5
+    assert governance_body["decision_count"] == 1
+    assert governance_body["explanation_coverage"] == 1.0
+    assert governance_body["outcome_coverage"] == 1.0
+    assert governance_body["overall_status"] == "passing"
+    assert len(governance_body["controls"]) == 4
+
+    persisted_audit_text = audit_log_path.read_text(encoding="utf-8")
+    assert '"application_id": "app_test"' not in persisted_audit_text
+    assert "ref_" in persisted_audit_text

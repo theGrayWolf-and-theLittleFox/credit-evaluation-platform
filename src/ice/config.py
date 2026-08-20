@@ -26,7 +26,11 @@ class Settings(BaseSettings):
 
     # Sensitive attributes handling
     allow_sensitive_in_model: bool = False
-    store_sensitive_for_monitoring: bool = True
+    store_sensitive_for_monitoring: bool = False
+
+    # Audit privacy
+    hash_audit_identifiers: bool = True
+    audit_identifier_salt: str | None = None
 
     # API auth (demo: API key header)
     api_key: str | None = None  # if set, require X-API-Key
@@ -34,5 +38,4 @@ class Settings(BaseSettings):
 
 def get_settings() -> Settings:
     return Settings()
-
 

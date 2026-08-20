@@ -6,6 +6,7 @@ import {
   demoFairness,
   demoFeatureContract,
   demoHealth,
+  demoGovernanceSummary,
   demoModelInfo,
   demoPortfolioAnalysis,
   demoScoreResult,
@@ -18,7 +19,9 @@ import {
   FairnessRow,
   FeatureContract,
   HealthResponse,
+  GovernanceSummary,
   ModelInfo,
+  OutcomePayload,
   PortfolioAnalysisRequest,
   PortfolioAnalysisResult,
   ScorePayload,
@@ -95,6 +98,21 @@ export async function fetchFeatureContract(): Promise<FeatureContract> {
     return Promise.resolve(demoFeatureContract);
   }
   return getJson<FeatureContract>("/v1/features/contract");
+}
+
+export async function fetchGovernanceSummary(): Promise<GovernanceSummary> {
+  if (!USE_API) {
+    return Promise.resolve(demoGovernanceSummary);
+  }
+  return getJson<GovernanceSummary>("/v1/governance/summary");
+}
+
+export async function submitOutcome(payload: OutcomePayload): Promise<{ status: string }> {
+  if (!USE_API) {
+    await new Promise((resolve) => window.setTimeout(resolve, 350));
+    return { status: "ok" };
+  }
+  return postJson<{ status: string }>("/v1/audit/events", payload);
 }
 
 export async function scoreApplicant(payload: ScorePayload): Promise<ScoreResult> {

@@ -5,6 +5,7 @@ import {
   FairnessReport,
   FeatureContract,
   HealthResponse,
+  GovernanceSummary,
   ModelInfo,
   PortfolioAnalysisResult,
   PortfolioApplicationInput,
@@ -14,6 +15,28 @@ import {
 
 export const demoHealth: HealthResponse = {
   status: "ok",
+};
+
+export const demoGovernanceSummary: GovernanceSummary = {
+  overall_status: "review",
+  readiness: 0.5,
+  event_count: 148,
+  event_counts: { decision: 64, explain: 62, fairness_report: 8, outcome: 14 },
+  decision_count: 64,
+  approval_rate: 0.625,
+  explanation_coverage: 0.9688,
+  outcome_coverage: 0.7813,
+  latest_fairness: {
+    demographic_parity_difference: 0.08,
+    equal_opportunity_difference: 0.06,
+    groups: ["18-24", "25-34", "35-44"],
+  },
+  controls: [
+    { id: "explanation_coverage", label: "Decision explanation coverage", value: 0.9688, threshold: 0.95, status: "passing" },
+    { id: "outcome_coverage", label: "Observed outcome coverage", value: 0.7813, threshold: 0.8, status: "review" },
+    { id: "fairness_threshold", label: "Latest fairness threshold review", value: 0.08, threshold: 0.1, status: "passing" },
+    { id: "audit_integrity", label: "Decision audit capture", value: 1, threshold: 1, status: "passing" },
+  ],
 };
 
 export const demoModelInfo: ModelInfo = {

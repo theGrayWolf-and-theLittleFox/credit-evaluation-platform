@@ -19,6 +19,9 @@ jobs:
       - name: Lint
         run: |
           ruff check .
+      - name: Public content policy
+        run: |
+          python scripts/check_public_content.py
       - name: Test
         run: |
           pytest
