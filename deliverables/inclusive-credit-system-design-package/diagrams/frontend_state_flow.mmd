@@ -1,0 +1,19 @@
+flowchart TD
+  APP[App.tsx<br/>score, explanation, fairness, portfolio, errors, filters] --> Q[React Query reads<br/>health, model, contract, audit, governance]
+  APP --> W[Write actions<br/>score, explain, fairness, portfolio, outcome]
+  Q --> ADAPTER[Typed API adapter]
+  W --> ADAPTER
+  ADAPTER -->|live| FASTAPI[FastAPI JSON contracts]
+  ADAPTER -->|mock| FIXTURES[Fixtures plus runtime-generated mock fields]
+
+  APP --> HERO[Navbar and Hero]
+  APP --> FORM[ScoreForm]
+  APP --> RESULTS[Metrics and BorrowerTransparency]
+  APP --> XF[Explainability and Fairness]
+  APP --> PORT[PortfolioWorkbench]
+  APP --> OUT[OutcomeTracker]
+  APP --> GOV[GovernanceCenter]
+  APP --> AUD[AuditTable]
+
+  OUT -->|refetch| Q
+  W -->|score/explain/fairness/portfolio changes| Q

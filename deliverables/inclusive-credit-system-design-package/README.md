@@ -4,7 +4,7 @@ Repository reviewed: `credit-evaluation-platform`
 
 ## Purpose
 
-This dossier records the engineering work completed to date for the two linked initiatives in Mr. Wang's project plan: an open-source alternative-data credit evaluation framework and a real-time decision-support platform with continuous governance. It covers the architecture, technical specifications, implemented components, model-development work, fairness testing, and repository evidence. The project plan identifies the Fair Credit Reporting Act and the Equal Credit Opportunity Act as relevant review frameworks; this dossier documents technical controls and does not offer a legal-compliance conclusion.
+This dossier records the engineering work completed to date for the two linked initiatives in Mr. Wang's project plan: an open-source alternative-data credit evaluation framework and a real-time decision-support platform with continuous governance. It is also a comprehensive project reference: architecture, implementation design, every principal model feature, every product capability, API and storage contracts, model-development work, fairness testing, security and operations design, verification requirements, and repository evidence. The project plan identifies the Fair Credit Reporting Act and the Equal Credit Opportunity Act as relevant review frameworks; this dossier documents technical controls and does not offer a legal-compliance conclusion.
 
 ## Evidence-status convention
 
@@ -27,10 +27,15 @@ Throughout the dossier, planned controls are kept separate from finished work. T
 8. `08_ARCHITECTURE_DIAGRAMS.md` — figure catalog with engineering interpretation and control implications.
 9. `09_PRODUCT_DEMONSTRATION.md` — local UI evidence, operator procedure, interpretation rules, and mock-mode limitations.
 10. `10_SUBMISSION_READINESS.md` — claim traceability, acceptance gates, evidence integrity, and reviewer guidance.
-11. `diagrams/` — six rendered architecture figures in SVG and PNG, plus editable Mermaid sources.
-12. `screenshots/` — twelve local mock-mode product captures covering the complete demonstration workflow.
-13. `evidence/` — machine-readable artifacts and integrity manifests generated from the current codebase.
-14. `Inclusive_Credit_Platform_Technical_Dossier.docx` — consolidated, professionally formatted version of this package.
+11. `11_DETAILED_IMPLEMENTATION_DESIGN.md` — module-level call paths, runtime configuration, handlers, storage, alternate implementation families, failure ownership, and consolidation design.
+12. `12_COMPLETE_FEATURE_CATALOG.md` — complete dictionary for the nine principal model features and every principal API and UI capability.
+13. `13_INTERFACE_AND_DATA_CONTRACT_REFERENCE.md` — endpoint-by-endpoint schemas, payloads, event formats, SQLite and registry structures, errors, versioning, and contract tests.
+14. `14_SECURITY_PRIVACY_AND_OPERATIONS.md` — trust boundaries, threats, identity, pseudonymization, artifact security, telemetry, deployment, recovery, incidents, and operating controls.
+15. `15_VERIFICATION_AND_ACCEPTANCE_REFERENCE.md` — current test evidence plus detailed unit, integration, model, fairness, security, product, accessibility, and release acceptance specifications.
+16. `diagrams/` — twelve rendered architecture figures in SVG and PNG, plus complete editable Mermaid sources.
+17. `screenshots/` — twelve local mock-mode product captures covering the complete demonstration workflow.
+18. `evidence/` — machine-readable artifacts and integrity manifests generated from the current codebase.
+19. `Inclusive_Credit_Platform_Technical_Dossier.docx` — consolidated, professionally formatted version of this package.
 
 ## Executive assessment
 

@@ -1,0 +1,21 @@
+stateDiagram-v2
+  [*] --> Received
+  Received --> Rejected: authentication or request policy fails
+  Received --> Validated: request and feature contract pass
+  Validated --> Rejected: missing, unknown, nonnumeric or incompatible input
+  Validated --> ArtifactReady: governed artifact and policy load
+  ArtifactReady --> Rejected: artifact unavailable or incompatible
+  ArtifactReady --> DecisionComputed: finite score and stable explanation evidence
+  DecisionComputed --> ReviewPath: approved degraded-review policy applies
+  DecisionComputed --> AuditCommitted: required audit evidence acknowledged
+  AuditCommitted --> Responded
+  AuditCommitted --> Rejected: durable audit requirement fails
+  ReviewPath --> AuditCommitted
+  Responded --> [*]
+  Rejected --> [*]
+
+  note right of ArtifactReady
+    Current code checks file availability.
+    Signature, digest, approval and schema gates
+    are target production controls.
+  end note

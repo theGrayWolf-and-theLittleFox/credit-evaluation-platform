@@ -1,0 +1,13 @@
+flowchart LR
+  R[Typed score request<br/>pseudonymous application reference<br/>feature map<br/>optional monitoring attributes] --> C[Feature contract<br/>required names<br/>unknown-name rejection<br/>numeric values<br/>fixed order]
+  C --> S[Minimal sanitization<br/>payment rates to 0..1<br/>event counts nonnegative]
+  S --> V[Vectorization<br/>required then optional<br/>missing optionals become 0.0]
+  V --> M[Logistic model<br/>probability of good outcome]
+  M --> P[Decision policy<br/>score compared with threshold]
+  P --> RC[Heuristic reason codes<br/>up to four ranked conditions]
+  M --> EX[Linear contribution proxy<br/>coefficient multiplied by raw value]
+  P --> AE[Decision audit event<br/>tokenized ID, versions, feature hash]
+
+  LIMIT[Current limitation:<br/>published UI ranges are not a complete backend rejection contract;<br/>reason and contribution fidelity require independent validation]:::risk
+
+  classDef risk fill:#FCE1E0,stroke:#B3261E,color:#172B4D

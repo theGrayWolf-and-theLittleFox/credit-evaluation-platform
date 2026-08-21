@@ -1,0 +1,13 @@
+flowchart LR
+  UI[React console<br/>App state, React Query, operator workflows] --> API[services/api<br/>principal documented FastAPI path]
+  API --> CORE[src/ice<br/>contract, scoring, explanations, fairness, audit]
+  CORE --> ART[(Artifacts<br/>model bundle, registry, reports, JSONL, SQLite)]
+
+  FLG[src/flg alternate family<br/>8-feature strict vector, 3-state policy, file audit] -. conceptual overlap .-> CORE
+  MIE[src/mie_credit_platform alternate family<br/>typed schema, CLI, approval registry, redacted audit] -. conceptual overlap .-> CORE
+  TESTS[Repository tests] --> API
+  TESTS --> FLG
+
+  NOTE[Production requirement:<br/>choose one public contract, migrate retained behavior,<br/>and retire alternate serving paths]:::risk
+
+  classDef risk fill:#FCE1E0,stroke:#B3261E,color:#172B4D

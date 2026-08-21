@@ -30,6 +30,11 @@ SOURCES = [
     ROOT / "08_ARCHITECTURE_DIAGRAMS.md",
     ROOT / "09_PRODUCT_DEMONSTRATION.md",
     ROOT / "10_SUBMISSION_READINESS.md",
+    ROOT / "11_DETAILED_IMPLEMENTATION_DESIGN.md",
+    ROOT / "12_COMPLETE_FEATURE_CATALOG.md",
+    ROOT / "13_INTERFACE_AND_DATA_CONTRACT_REFERENCE.md",
+    ROOT / "14_SECURITY_PRIVACY_AND_OPERATIONS.md",
+    ROOT / "15_VERIFICATION_AND_ACCEPTANCE_REFERENCE.md",
 ]
 EVIDENCE_ROOT = ROOT / "evidence"
 DIAGRAM_ROOT = ROOT / "diagrams"
@@ -40,6 +45,12 @@ DIAGRAM_DEFINITIONS = [
     ("Model lifecycle and governance", DIAGRAM_ROOT / "model_lifecycle_governance.mmd"),
     ("Data lineage and evidence", DIAGRAM_ROOT / "data_lineage_evidence.mmd"),
     ("Fairness control loop", DIAGRAM_ROOT / "fairness_control_loop.mmd"),
+    ("Current implementation map", DIAGRAM_ROOT / "current_implementation_map.mmd"),
+    ("Feature scoring pipeline", DIAGRAM_ROOT / "feature_scoring_pipeline.mmd"),
+    ("API and event topology", DIAGRAM_ROOT / "api_event_topology.mmd"),
+    ("Frontend state flow", DIAGRAM_ROOT / "frontend_state_flow.mmd"),
+    ("Privacy and audit flow", DIAGRAM_ROOT / "privacy_audit_flow.mmd"),
+    ("Failure and recovery state machine", DIAGRAM_ROOT / "failure_recovery_state_machine.mmd"),
 ]
 CORE_NS = {
     "dc": "http://purl.org/dc/elements/1.1/",
@@ -171,7 +182,7 @@ def add_cover(doc):
     p.paragraph_format.space_after = Pt(10)
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    font(p.add_run("Architecture, specifications, model development, fairness testing, and implementation evidence"), 14, color=SLATE)
+    font(p.add_run("Comprehensive architecture, implementation design, feature catalog, interfaces, model governance, testing, and evidence"), 14, color=SLATE)
     p.paragraph_format.space_after = Pt(60)
     for label, value in (
         ("Prepared by", "Mr. Wang"),
@@ -201,6 +212,11 @@ def add_contents(doc):
         "8. Architecture Diagram Catalog",
         "9. Product Demonstration and Operator Walkthrough",
         "10. Submission Readiness, Traceability, and Acceptance Package",
+        "11. Detailed Implementation Design Reference",
+        "12. Complete Feature and Product Capability Catalog",
+        "13. Interface, API, and Data Contract Reference",
+        "14. Security, Privacy, Deployment, and Operations Design",
+        "15. Verification, Testing, and Acceptance Reference",
         "Appendix A. Test and Training Evidence",
         "Appendix B. Baseline Training Report",
         "Appendix C. Model Registry Snapshot",
@@ -233,7 +249,7 @@ def add_inline(paragraph, text):
             font(paragraph.add_run(part), 10.5)
 
 
-def add_table(doc, rows):
+def add_table(doc, rows, *, font_size=8.6):
     parsed = [[c.strip() for c in row.strip().strip("|").split("|")] for row in rows]
     if len(parsed) > 1 and all(set(c) <= set("-: ") for c in parsed[1]):
         parsed.pop(1)
@@ -255,7 +271,7 @@ def add_table(doc, rows):
             p.paragraph_format.space_after = Pt(0)
             add_inline(p, text)
             for run in p.runs:
-                run.font.size = Pt(8.6)
+                run.font.size = Pt(font_size)
                 if ridx == 0:
                     run.bold = True
                     run.font.color.rgb = NAVY
@@ -271,6 +287,7 @@ def add_code(doc, lines):
     table = doc.add_table(rows=1, cols=1)
     table.style = "Table Grid"
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    prevent_table_row_split(table.rows[0])
     cell = table.cell(0, 0)
     shade(cell, "F5F7FA")
     set_cell_margins(cell, top=100, bottom=100, start=140, end=140)
@@ -282,20 +299,21 @@ def add_code(doc, lines):
     doc.add_paragraph().paragraph_format.space_after = Pt(1)
 
 
-def add_figure(doc, image_path, caption):
+def add_figure(doc, image_path, caption, *, compact=False):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.keep_together = True
+    p.paragraph_format.space_after = Pt(0)
     run = p.add_run()
-    picture = run.add_picture(str(image_path), width=Inches(6.65))
+    picture = run.add_picture(str(image_path), width=Inches(5.9 if compact else 6.65))
     picture._inline.docPr.set("descr", caption)
     picture._inline.docPr.set("title", caption)
     cp = doc.add_paragraph()
     cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    cp.paragraph_format.space_before = Pt(2)
-    cp.paragraph_format.space_after = Pt(8)
+    cp.paragraph_format.space_before = Pt(1 if compact else 2)
+    cp.paragraph_format.space_after = Pt(4 if compact else 8)
     cp.paragraph_format.keep_with_next = True
-    font(cp.add_run(caption), 9, italic=True, color=SLATE)
+    font(cp.add_run(caption), 8.6 if compact else 9, italic=True, color=SLATE)
 
 
 def new_numbering_id(doc):
@@ -334,6 +352,7 @@ def apply_num_id(paragraph, num_id):
 
 def append_markdown(doc, path, first=False):
     lines = path.read_text(encoding="utf-8").splitlines()
+    compact_architecture = path.name == "08_ARCHITECTURE_DIAGRAMS.md"
     if not first:
         doc.add_page_break()
     i = 0
@@ -353,28 +372,34 @@ def append_markdown(doc, path, first=False):
             while i < len(lines) and lines[i].startswith("|"):
                 rows.append(lines[i])
                 i += 1
-            add_table(doc, rows)
+            compact_contract_matrix = bool(rows and rows[0].startswith("| Test class | Minimum assertions |"))
+            add_table(doc, rows, font_size=7.9 if compact_contract_matrix else 8.6)
             continue
         elif line.startswith("!["):
             match = re.match(r"!\[([^]]+)\]\(([^)]+)\)", line)
             if match:
                 caption, relative_path = match.groups()
-                add_figure(doc, path.parent / relative_path, caption)
+                add_figure(doc, path.parent / relative_path, caption, compact=compact_architecture)
         elif line.startswith("# "):
             p = doc.add_heading(line[2:].strip(), level=1)
             p.paragraph_format.space_before = Pt(0)
             for run in p.runs:
                 font(run, 17, bold=True, color=NAVY)
         elif line.startswith("## "):
+            page_break_before = False
             if line.startswith("## Architecture view"):
                 if diagram_view_seen:
-                    doc.add_page_break()
+                    page_break_before = True
                 diagram_view_seen = True
             if line.startswith("## Demonstration screen"):
                 if demonstration_view_seen:
-                    doc.add_page_break()
+                    page_break_before = True
                 demonstration_view_seen = True
             p = doc.add_heading(line[3:].strip(), level=2)
+            p.paragraph_format.page_break_before = page_break_before
+            if compact_architecture:
+                p.paragraph_format.space_before = Pt(6)
+                p.paragraph_format.space_after = Pt(3)
             for run in p.runs:
                 font(run, 13.5, bold=True, color=BLUE)
         elif line.startswith("### "):
@@ -394,6 +419,9 @@ def append_markdown(doc, path, first=False):
             add_inline(p, line[2:])
         elif line.strip():
             p = doc.add_paragraph()
+            if compact_architecture:
+                p.paragraph_format.space_after = Pt(2)
+                p.paragraph_format.line_spacing = 1.0
             add_inline(p, line)
         i += 1
 
@@ -448,7 +476,7 @@ def add_evidence_appendices(doc):
     p = doc.add_paragraph()
     add_inline(
         p,
-        "The rendered diagrams in Section 8 are the print views. The Mermaid definitions below are the complete editable graph sources used to regenerate those views.",
+        "The twelve rendered diagrams in Section 8 are the print views. The Mermaid definitions below are the complete editable graph sources used to regenerate those views.",
     )
     for index, (label, path) in enumerate(DIAGRAM_DEFINITIONS):
         if index:
@@ -503,7 +531,7 @@ def main():
     add_evidence_appendices(doc)
     props = doc.core_properties
     props.title = "Inclusive Credit Evaluation Platform — Technical Evidence Dossier"
-    props.subject = "Architecture, specifications, model development, fairness testing, and implementation evidence"
+    props.subject = "Comprehensive architecture, implementation design, feature catalog, interfaces, model governance, testing, and evidence"
     props.author = "Mr. Wang"
     props.keywords = "credit, alternative data, responsible AI, fairness, model risk, architecture"
     doc.save(OUT)

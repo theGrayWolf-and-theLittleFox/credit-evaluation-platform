@@ -192,13 +192,167 @@ function fairnessLoop() {
   return s+finish();
 }
 
+function implementationMap() {
+  let s=base("Current implementation map","Repository-level view of the active demonstration path and the two alternate implementation families");
+  s+=rect(45,145,1510,735,{fill:"#FBFCFD",stroke:C.line,sw:2,rx:14});
+  s+=node(75,190,300,165,"React operator console","App orchestration, contract-driven form, scoring, explanation, fairness, portfolio, outcomes, governance, audit explorer",{fill:C.cyan,stroke:C.blue});
+  s+=node(470,190,300,165,"services/api","Principal documented FastAPI path: nine routes, API-key dependency, privacy validation, JSONL/SQLite audit",{fill:C.green,stroke:C.greenLine});
+  s+=node(865,190,300,165,"src/ice","Core contract, model abstraction, logistic-regression bundle, training, reasons, fairness metrics, audit primitives",{fill:C.green,stroke:C.greenLine});
+  s+=node(1260,190,250,165,"artifacts","Synthetic data, model bundle, registry JSON, report JSON, JSONL and optional SQLite evidence",{fill:C.purple,stroke:C.purpleLine});
+  s+=line(375,272,470,272,{stroke:C.blue});s+=line(770,272,865,272,{stroke:C.greenLine});s+=line(1165,272,1260,272,{stroke:C.purpleLine});
+  s+=tag(165,375,"active frontend integration",C.cyan,C.blue);s+=tag(555,375,"principal dossier path",C.green,C.greenLine);s+=tag(955,375,"shared core",C.green,C.greenLine);
+  s+=node(120,470,385,145,"src/flg alternate family","Strict eight-feature vector; scaled logistic regression; approve/review/deny thresholds; coefficient reason records; per-file JSONL audit",{fill:C.amber,stroke:C.amberLine});
+  s+=node(610,470,385,145,"src/mie_credit_platform alternate family","Typed eight-feature schema; CLI and API; approval-aware registry; SQLite/JSONL audit with configurable redaction",{fill:C.amber,stroke:C.amberLine});
+  s+=node(1100,470,360,145,"Shared repository tests","Main-path end-to-end, governance, privacy and fairness tests plus an FLG smoke test; one unresolved governance expectation",{fill:C.gray,stroke:C.line});
+  s+=path("M312 470 V430 H620 V355",{stroke:C.amberLine,dash:"8 6"});
+  s+=path("M802 470 V430 H1015 V355",{stroke:C.amberLine,dash:"8 6"});
+  s+=line(995,542,1100,542,{stroke:C.line});
+  s+=rect(130,690,1340,125,{fill:C.red,stroke:C.redLine,sw:2,rx:10});
+  s+=text(155,722,"Canonicalization requirement",{size:19,weight:700,fill:C.redLine});
+  s+=text(155,753,"The three Python families use different feature names, lookback windows, decision states, schemas, registries, and audit formats.",{size:16});
+  s+=text(155,782,"Production work must select one contract, migrate retained behavior under tests, and retire the other public serving paths.",{size:16});
+  s+=tag(475,842,"dashed lines indicate conceptual overlap, not runtime calls",C.gray,C.line);
+  return s+finish();
+}
+
+function featurePipeline() {
+  let s=base("Feature contract and scoring pipeline","Current main-path behavior from typed request through decision, explanation, and audit evidence");
+  const stages=[
+    [55,190,220,"Request schema","pseudonymous application_id; numeric feature map; optional monitoring attributes",C.gray,C.line],
+    [315,190,220,"Contract validation","required names; unknown-name rejection; numeric type check; fixed column order",C.cyan,C.blue],
+    [575,190,220,"Sanitization","clamp two payment rates; prevent negative NSF and overdraft counts",C.cyan,C.blue],
+    [835,190,220,"Vectorization","required then optional columns; missing optional values become 0.0; float array",C.cyan,C.blue],
+    [1095,190,220,"Model inference","approved-current registry pointer or fallback path; logistic probability",C.green,C.greenLine],
+    [1355,190,190,"Policy","threshold comparison; approve or deny",C.green,C.greenLine]
+  ];
+  stages.forEach((n,i)=>{s+=node(n[0],n[1],n[2],145,`${i+1}. ${n[3]}`,n[4],{fill:n[5],stroke:n[6]});if(i<stages.length-1)s+=line(n[0]+n[2],262,stages[i+1][0],262,{stroke:i<4?C.blue:C.greenLine});});
+  s+=node(190,500,310,135,"Reason-code path","Seven heuristic conditions rank up to four codes by threshold distance; optional tenure fields have no heuristic code",{fill:C.amber,stroke:C.amberLine});
+  s+=node(645,500,310,135,"Contribution path","Linear proxy returns coefficient multiplied by raw ordered feature value; base value is not returned",{fill:C.amber,stroke:C.amberLine});
+  s+=node(1100,500,310,160,"Decision-event path","Tokenized application reference, request and model versions, score, threshold, reasons, feature hash; raw values off by default",{fill:C.purple,stroke:C.purpleLine});
+  s+=path("M1450 335 V425 H345 V500",{stroke:C.amberLine});
+  s+=path("M1190 335 V420 H800 V500",{stroke:C.amberLine});
+  s+=path("M1450 335 V445 H1255 V500",{stroke:C.purpleLine});
+  s+=rect(180,720,1240,130,{fill:C.red,stroke:C.redLine,sw:2,rx:10});
+  s+=text(205,752,"Current boundary conditions",{size:19,weight:700,fill:C.redLine});
+  s+=text(205,782,"Published UI minima and maxima are descriptive metadata; the main backend does not reject every out-of-range value.",{size:16});
+  s+=text(205,810,"Reason codes and coefficient proxies require separate fidelity validation before borrower-notice or adverse-action use.",{size:16});
+  s+=tag(505,884,"protected attributes are excluded from the model vector",C.green,C.greenLine);
+  return s+finish();
+}
+
+function apiEventTopology() {
+  let s=base("API surface and audit-event topology","Principal services/api routes, core handlers, emitted evidence, and read-side dependencies");
+  s+=rect(60,155,270,725,{fill:C.cyan,stroke:C.blue,rx:12});s+=text(85,187,"HTTP SURFACE",{size:16,weight:700,fill:C.navy});
+  const routes=["GET /health","GET /v1/models/current","GET /v1/features/contract","POST /v1/score","POST /v1/explain","POST /v1/portfolio/analyze","POST /v1/audit/fairness","POST /v1/audit/events","GET /v1/audit/events","GET /v1/governance/summary"];
+  routes.forEach((r,i)=>{const y=210+i*61;s+=rect(82,y,226,48,{fill:C.white,stroke:i===0?C.line:C.blue,sw:2,rx:8});s+=text(98,y+30,r,{size:14.5,weight:700,fill:C.navy});});
+  s+=rect(385,155,390,725,{fill:C.green,stroke:C.greenLine,rx:12});s+=text(410,187,"APPLICATION SERVICES",{size:16,weight:700,fill:C.navy});
+  s+=node(420,220,320,100,"ModelStore + registry","Resolve current entry, fall back to configured model path, load joblib bundle",{fill:C.white});
+  s+=node(420,355,320,100,"Scoring + explanation","Sanitize, vectorize, predict, threshold, heuristic reasons, linear contributions",{fill:C.white});
+  s+=node(420,490,320,100,"Portfolio + fairness","Cohort scoring, bands, reason counts, group rates, parity and opportunity gaps",{fill:C.white});
+  s+=node(420,625,320,100,"Privacy + governance","Pseudonymous ID validation, optional hashing, coverage controls, readiness state",{fill:C.white});
+  s+=rect(830,155,310,725,{fill:C.purple,stroke:C.purpleLine,rx:12});s+=text(855,187,"WRITE-SIDE EVENTS",{size:16,weight:700,fill:C.navy});
+  const ev=[
+    ["decision","score, decision, threshold, reasons, feature hash"],
+    ["explain","score, reason list, contribution count"],
+    ["portfolio_analysis","count, score and decision aggregates, group key"],
+    ["fairness_report","groups, counts and two difference metrics"],
+    ["outcome","repayment window, binary observed result"]
+  ];
+  ev.forEach((e,i)=>s+=node(865,220+i*123,240,105,e[0],e[1],{fill:C.white,stroke:C.purpleLine}));
+  s+=rect(1195,155,350,725,{fill:C.gray,stroke:C.line,rx:12});s+=text(1220,187,"PERSISTENCE + READ SIDE",{size:16,weight:700,fill:C.navy});
+  s+=node(1230,235,280,110,"JSONL event stream","Append current events; list, filter, normalize, sort, paginate",{fill:C.white});
+  s+=node(1230,400,280,110,"Optional SQLite mirror","Decision and outcome tables only in the main path",{fill:C.white});
+  s+=node(1230,565,280,110,"Audit explorer","Reads normalized events by type or application reference",{fill:C.white});
+  s+=node(1230,730,280,105,"Governance summary","Reads up to 250 events; derives coverage and threshold status",{fill:C.white});
+  s+=line(330,505,385,505,{stroke:C.blue});s+=line(775,505,830,505,{stroke:C.purpleLine});s+=line(1140,505,1195,505,{stroke:C.purpleLine});
+  s+=tag(475,900,"health is outside the v1 API-key dependency",C.amber,C.amberLine);
+  s+=tag(975,900,"outcome writes are not idempotent",C.red,C.redLine);
+  return s+finish();
+}
+
+function frontendFlow() {
+  let s=base("Frontend component and state flow","React console composition, query ownership, write actions, and mock/live adapter boundary");
+  s+=node(55,170,260,125,"App.tsx state owner","score, explanation, fairness, portfolio, error, loading flags, audit filters",{fill:C.cyan,stroke:C.blue});
+  s+=node(370,170,260,125,"React Query read model","health, model info, feature contract, audit events, governance summary",{fill:C.cyan,stroke:C.blue});
+  s+=node(685,170,260,125,"Typed API adapter","same TypeScript response shapes; fetch in live mode; fixtures and generated fields in mock mode",{fill:C.green,stroke:C.greenLine});
+  s+=node(1000,170,250,125,"FastAPI live path","HTTP JSON contracts, API key, persisted audit events",{fill:C.green,stroke:C.greenLine});
+  s+=node(1305,170,240,125,"Mock data path","fixed model, contract, fairness, portfolio, audit and governance fixtures",{fill:C.amber,stroke:C.amberLine});
+  s+=line(315,232,370,232,{stroke:C.blue});s+=line(630,232,685,232,{stroke:C.greenLine});s+=line(945,215,1000,215,{stroke:C.greenLine});s+=line(945,260,1305,260,{stroke:C.amberLine});
+  const comps=[
+    [60,430,"Hero + Navbar","mode, health, active model, contract count, threshold, section navigation"],
+    [350,430,"ScoreForm","contract groups, applicant reference, nine features, monitoring attributes, score/explain actions"],
+    [640,430,"Metrics + Borrower","decision, score, reasons, rights, reconsideration and factor explanations"],
+    [930,430,"Explain + Fairness","contribution bars, synthetic cohort, group rates and report action"],
+    [1220,430,"Portfolio","cohort generation, group key, aggregate summary, reason frequency, row preview"]
+  ];
+  comps.forEach(c=>s+=node(c[0],c[1],260,135,c[2],c[3],{fill:C.white,stroke:C.line}));
+  s+=node(205,675,300,125,"OutcomeTracker","links a scored application to one of four binary repayment windows; triggers audit and governance refetch",{fill:C.white,stroke:C.line});
+  s+=node(650,675,300,125,"GovernanceCenter","control register, decision lineage and monitoring tabs; live summary plus design fixtures",{fill:C.white,stroke:C.line});
+  s+=node(1095,675,300,125,"AuditTable","event-type and application filters; total count; normalized payload inspection",{fill:C.white,stroke:C.line});
+  s+=path("M185 430 V350 H185 V295",{stroke:C.blue});s+=path("M480 430 V350 H240 V295",{stroke:C.blue});
+  s+=path("M770 430 V350 H240 V295",{stroke:C.blue});s+=path("M1060 430 V350 H505 V295",{stroke:C.blue});s+=path("M1350 430 V350 H505 V295",{stroke:C.blue});
+  s+=path("M355 675 V635 H240 V295",{stroke:C.blue});s+=path("M800 675 V635 H505 V295",{stroke:C.blue});s+=path("M1245 675 V635 H505 V295",{stroke:C.blue});
+  s+=tag(315,875,"mock outcome returns ok but does not persist",C.red,C.redLine);
+  s+=tag(830,875,"mock score and decision are runtime-generated",C.amber,C.amberLine);
+  return s+finish();
+}
+
+function privacyAuditFlow() {
+  let s=base("Privacy minimization and audit flow","Current controls for applicant references, feature evidence, monitoring attributes, and operator reads");
+  s+=node(55,185,260,125,"Client payload","pseudonymous application reference; scored features; optional sensitive monitoring context",{fill:C.gray});
+  s+=node(370,185,260,125,"Reference validator","allowlisted characters and length; reject email, telephone, government-ID and whitespace patterns",{fill:C.cyan,stroke:C.blue});
+  s+=node(685,185,260,125,"Audit identifier policy","SHA-256 with optional deployment salt; ref_ prefix; hashing enabled by default",{fill:C.green,stroke:C.greenLine});
+  s+=node(1000,185,260,125,"Decision event minimizer","feature hash always; raw features disabled by default; sensitive context disabled by default",{fill:C.green,stroke:C.greenLine});
+  s+=node(1315,185,230,125,"Storage","JSONL append; optional SQLite decision and outcome mirror",{fill:C.purple,stroke:C.purpleLine});
+  s+=line(315,247,370,247,{stroke:C.blue});s+=line(630,247,685,247,{stroke:C.greenLine});s+=line(945,247,1000,247,{stroke:C.greenLine});s+=line(1260,247,1315,247,{stroke:C.purpleLine});
+  s+=node(135,455,300,160,"Scoring response","Returns the submitted pseudonymous reference, request ID, model/schema versions, decision evidence; client handles display",{fill:C.cyan,stroke:C.blue});
+  s+=node(540,455,300,160,"Audit read API","Filters application reference through the same hashing policy before matching stored events",{fill:C.cyan,stroke:C.blue});
+  s+=node(945,455,300,160,"Outcome linkage","Uses the same tokenized reference so later outcomes can be joined without storing the source reference",{fill:C.green,stroke:C.greenLine});
+  s+=path("M500 310 V400 H285 V455",{stroke:C.blue});s+=path("M800 310 V400 H690 V455",{stroke:C.blue});s+=path("M800 310 V400 H1095 V455",{stroke:C.greenLine});
+  s+=rect(185,720,1230,130,{fill:C.red,stroke:C.redLine,sw:2,rx:10});
+  s+=text(210,752,"Production controls still required",{size:19,weight:700,fill:C.redLine});
+  s+=text(210,782,"Secret-managed nonempty salt, tenant-scoped tokens, encryption and key rotation, immutable storage, retention and deletion policy,",{size:16});
+  s+=text(210,810,"purpose-based access, export controls, breach monitoring, correction workflow, and proof that raw request bodies are absent from telemetry.",{size:16});
+  s+=tag(540,884,"a pseudonymous reference is still linkable data",C.amber,C.amberLine);
+  return s+finish();
+}
+
+function failureStateMachine() {
+  let s=base("Serving failure and recovery state machine","Fail-closed target behavior for request, model, explanation, audit, and monitoring dependencies");
+  const n=(x,y,title,detail,fill,stroke)=>{s+=node(x,y,270,115,title,detail,{fill,stroke});};
+  n(70,185,"Receive request","assign correlation ID; authenticate; enforce request and tenant policy",C.cyan,C.blue);
+  n(410,185,"Validate contract","pseudonymous reference, required names, types, bounds and schema compatibility",C.cyan,C.blue);
+  n(750,185,"Load governed artifact","approved current pointer, digest/signature, feature hash, threshold policy",C.purple,C.purpleLine);
+  n(1090,185,"Compute decision","finite score, explicit policy state, stable reasons and version evidence",C.green,C.greenLine);
+  n(1260,430,"Commit audit evidence","durable acknowledgement before a consequential result leaves the boundary",C.green,C.greenLine);
+  n(870,430,"Return response","decision support result plus correlation, model, schema, policy and reason versions",C.green,C.greenLine);
+  n(480,430,"Degraded review path","only under an approved lender policy; never substitute another model silently",C.amber,C.amberLine);
+  n(90,430,"Reject safely","bounded status, safe message, correlation ID; no raw values or internal path",C.red,C.redLine);
+  s+=line(340,242,410,242,{stroke:C.blue});s+=line(680,242,750,242,{stroke:C.purpleLine});s+=line(1020,242,1090,242,{stroke:C.greenLine});
+  s+=path("M1225 300 V360 H1395 V430",{stroke:C.greenLine});s+=line(1260,487,1140,487,{stroke:C.greenLine});
+  s+=path("M410 300 V370 H225 V430",{stroke:C.redLine,dash:"7 5"});s+=path("M750 300 V370 H225 V430",{stroke:C.redLine,dash:"7 5"});
+  s+=path("M1090 300 V370 H615 V430",{stroke:C.amberLine,dash:"7 5"});s+=path("M1260 545 V650 H225 V545",{stroke:C.redLine,dash:"7 5"});
+  s+=rect(160,700,1280,150,{fill:C.gray,stroke:C.line,sw:2,rx:10});
+  s+=text(185,733,"Implementation status",{size:19,weight:700,fill:C.navy});
+  s+=text(185,765,"Current code returns 400 for core contract errors and 503 when the model artifact is missing. API-key auth is optional.",{size:16});
+  s+=text(185,795,"Idempotency, rate limits, tenant authorization, signature verification, durable audit acknowledgement, circuit breakers, and review-mode policy remain target controls.",{size:16});
+  s+=tag(550,886,"no silent model fallback",C.red,C.redLine);s+=tag(825,886,"no unaudited consequential response",C.red,C.redLine);
+  return s+finish();
+}
+
 const diagrams = {
   "system-context": systemContext(),
   "online-scoring-sequence": scoringSequence(),
   "production-deployment-topology": deployment(),
   "model-lifecycle-governance": lifecycle(),
   "data-lineage-evidence": lineage(),
-  "fairness-control-loop": fairnessLoop()
+  "fairness-control-loop": fairnessLoop(),
+  "current-implementation-map": implementationMap(),
+  "feature-scoring-pipeline": featurePipeline(),
+  "api-event-topology": apiEventTopology(),
+  "frontend-state-flow": frontendFlow(),
+  "privacy-audit-flow": privacyAuditFlow(),
+  "failure-recovery-state-machine": failureStateMachine()
 };
 
 for (const [name, svg] of Object.entries(diagrams)) {

@@ -1,0 +1,13 @@
+flowchart LR
+  C[Client payload<br/>pseudonymous reference<br/>features<br/>optional monitoring context] --> V[Reference validator<br/>safe character and length rule<br/>direct-identifier pattern rejection]
+  V --> H[Audit ID policy<br/>SHA-256 plus optional salt<br/>ref_ token]
+  H --> M[Event minimizer<br/>feature hash<br/>raw features off by default<br/>sensitive context off by default]
+  M --> J[(JSONL append)]
+  M --> S[(optional SQLite mirror)]
+  H --> O[Outcome linkage]
+  H --> R[Audit read filter]
+  J --> R
+
+  NEED[Production additions:<br/>secret-managed salt, tenant scope, key rotation, immutable storage,<br/>retention/deletion, correction workflow, access evidence]:::risk
+
+  classDef risk fill:#FCE1E0,stroke:#B3261E,color:#172B4D

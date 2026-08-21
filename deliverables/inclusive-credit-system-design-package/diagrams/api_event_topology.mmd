@@ -1,0 +1,28 @@
+flowchart LR
+  subgraph HTTP[Principal HTTP surface]
+    H[GET /health]
+    MI[GET /v1/models/current]
+    FC[GET /v1/features/contract]
+    SC[POST /v1/score]
+    EX[POST /v1/explain]
+    PA[POST /v1/portfolio/analyze]
+    FR[POST /v1/audit/fairness]
+    OW[POST /v1/audit/events]
+    AR[GET /v1/audit/events]
+    GS[GET /v1/governance/summary]
+  end
+
+  SC --> D[decision event]
+  EX --> E[explain event]
+  PA --> P[portfolio_analysis event]
+  FR --> F[fairness_report event]
+  OW --> O[outcome event]
+  D --> J[(JSONL stream)]
+  E --> J
+  P --> J
+  F --> J
+  O --> J
+  D --> S[(optional SQLite decision table)]
+  O --> T[(optional SQLite outcome table)]
+  J --> AR
+  J --> GS
