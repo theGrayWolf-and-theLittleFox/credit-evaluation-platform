@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, Optional, Sequence
 
 import joblib
 import numpy as np
@@ -43,11 +43,29 @@ class SklearnLogRegCreditModel(CreditModel):
         proba = self._bundle.model.predict_proba(x.reshape(1, -1))[0, 1]
         return float(proba)
 
-    def explain_linear(self, x: np.ndarray, feature_names: list[str]) -> Optional[Dict[str, float]]:
-        # For logistic regression, use coefficient * feature as an interpretable proxy.
+    def explain_linear(
+        self,
+        x: np.ndarray,
+        feature_names: list[str],
+        reference: Optional[Sequence[float]] = None,
+    ) -> Optional[Dict[str, float]]:
+        """
+        Per-feature contribution for a linear model.
+
+        With a reference profile, each contribution is coef * (value - reference), so
+        the values sum exactly to the difference in log-odds between this applicant and
+        the reference applicant. Reporting coef * value instead makes every explanation
+        look the same: an unscaled feature such as monthly income dominates purely
+        because of its magnitude, and a feature whose value is zero contributes nothing
+        no matter how heavily it is weighted.
+
+        Without a reference the raw coef * value proxy is returned, which is kept only
+        for backwards compatibility with callers that predate the reference profile.
+        """
         coef = self._bundle.model.coef_.reshape(-1)
-        contrib = {fn: float(coef[i] * x[i]) for i, fn in enumerate(feature_names)}
-        return contrib
+        if reference is None:
+            return {fn: float(coef[i] * x[i]) for i, fn in enumerate(feature_names)}
+        return {fn: float(coef[i] * (x[i] - reference[i])) for i, fn in enumerate(feature_names)}
 
 
 def save_bundle(path: str, bundle: SklearnLogRegBundle) -> None:

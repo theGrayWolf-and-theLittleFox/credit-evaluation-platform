@@ -40,6 +40,11 @@ export function ExplainabilityPanel({ contract, explanation, scoreRequestId }: P
             {scoreRequestId && <span className="chip">Latest score request: {scoreRequestId}</span>}
           </div>
 
+          <p className="muted explanation-note">
+            Log-odds movement versus the reference profile in the feature contract. Positive values push toward
+            approval; the values sum to the gap between this applicant and a typical one.
+          </p>
+
           <div className="explanation-stack">
             {sortedContributions.map((row) => {
               const width = `${(Math.abs(row.contribution) / maxMagnitude) * 100}%`;
@@ -63,8 +68,8 @@ export function ExplainabilityPanel({ contract, explanation, scoreRequestId }: P
         </>
       ) : (
         <p className="muted">
-          Explanations show lightweight feature contributions for the current model. Use “Explain only” or score an
-          applicant first.
+          Explanations show how far each input moves the decision relative to the reference profile published in the
+          feature contract. Use “Explain only” or score an applicant first.
         </p>
       )}
     </section>

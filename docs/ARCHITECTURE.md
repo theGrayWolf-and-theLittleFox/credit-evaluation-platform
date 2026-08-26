@@ -37,11 +37,23 @@ Implementation:
 #### 3) Explainability layer (reason codes)
 
 The platform returns **reason codes** suitable for adverse-action style explanation patterns
-(without asserting any legal sufficiency).
+(without asserting any legal sufficiency), plus per-feature contributions for linear models.
+
+Contributions are measured **against a published reference profile**
+(`ice.features.contract.REFERENCE_PROFILE`), not against zero. Each value is
+`coef * (applicant_value - reference_value)`, so the set sums exactly to the difference in
+log-odds between this applicant and a typical one, and a client can reproduce the baseline
+from the `default_value` fields the API publishes in `/v1/features/contract`.
+
+Reporting `coef * value` instead makes every explanation look alike: features are unscaled,
+so a dollar-denominated input dominates purely by magnitude, and any feature sitting at zero
+contributes nothing regardless of its weight. `tests/test_explanation_reference.py` pins both
+properties.
 
 Implementation:
 
 - `src/ice/explain/reason_codes.py`
+- `src/ice/explain/explainer.py` (reference-relative contributions)
 - optional SHAP/LIME integration points in `src/ice/explain/`
 
 #### 4) Audit/event layer
