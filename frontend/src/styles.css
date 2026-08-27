@@ -778,6 +778,13 @@ a {
   color: #cfe4f1;
 }
 
+.explanation-note {
+  margin: 12px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  max-width: 62ch;
+}
+
 .explanation-stack {
   margin-top: 12px;
   display: grid;

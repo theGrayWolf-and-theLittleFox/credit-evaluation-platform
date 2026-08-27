@@ -6,7 +6,7 @@ Mission: build a public, open-source technical platform that helps lenders respo
 ### Problem statement
 - Black-box scores: proprietary bureau models are opaque and hard to audit.
 - Capacity gaps: community lenders and CDFIs often lack the engineering depth to deploy transparent AI that satisfies FCRA/ECOA expectations.
-- Credit invisible population: ~45 million U.S. adults are thin-file or unscorable, with disproportionate impact on minority and low-income borrowers.
+- Credit invisible population: roughly 32 million U.S. adults have limited credit histories — about 7.0 million credit invisible and about 25 million with unscored records as of 2020 — with disproportionate impact on minority and low-income borrowers. These are the CFPB's corrected estimates from its [June 2025 technical correction](https://files.consumerfinance.gov/f/documents/cfpb_update-credit-invisibles-estimate_2025-06.pdf), which supersedes the widely cited ~45 million figure derived from the Bureau's 2015 analysis of 2010 data.
 
 ### Technical solution (high level)
 - **Fairness-aware modeling:** integrate AIF360/Fairlearn to detect and mitigate disparate impact.

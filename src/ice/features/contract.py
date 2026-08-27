@@ -42,6 +42,15 @@ class FeatureContract:
     def columns(self) -> Iterable[str]:
         return list(self.required) + list(self.optional)
 
+    def reference_vector(self, reference: Dict[str, float]) -> Tuple[float, ...]:
+        """
+        Order a reference profile into the contract's column order.
+
+        Missing entries fall back to 0.0 so an incomplete reference degrades to the
+        raw coef*value behaviour for that feature rather than raising.
+        """
+        return tuple(float(reference.get(name, 0.0)) for name in self.columns())
+
 
 DEFAULT_CONTRACT = FeatureContract(
     required=(
@@ -58,5 +67,29 @@ DEFAULT_CONTRACT = FeatureContract(
         "months_at_current_address",
     ),
 )
+
+
+# Reference profile used as the baseline for explanation contributions.
+#
+# Feature contributions are reported as coef * (value - reference), i.e. how far this
+# applicant's inputs move the log-odds relative to a typical applicant, rather than
+# coef * value. Without a reference, an unscaled feature such as monthly income
+# dominates every explanation purely because of its magnitude, and any feature whose
+# value is zero contributes exactly zero regardless of its weight.
+#
+# These values are the same defaults the API publishes in the feature contract
+# (`default_value` in services/api/analytics.py), so a client can reproduce the
+# baseline from the public contract. tests/test_reference_profile.py asserts they agree.
+REFERENCE_PROFILE: Dict[str, float] = {
+    "rent_on_time_rate_12m": 0.94,
+    "utility_on_time_rate_12m": 0.91,
+    "avg_monthly_income_6m": 4200.0,
+    "cashflow_volatility_6m": 0.24,
+    "avg_daily_balance_6m": 1800.0,
+    "nsf_events_12m": 0.0,
+    "overdraft_events_12m": 0.0,
+    "months_at_current_job": 18.0,
+    "months_at_current_address": 24.0,
+}
 
 
